@@ -1,13 +1,29 @@
 import 'package:flutter/material.dart';
 import '../model/billing_item.dart';
+import '../model/order_billing_model.dart';
+import '../repository/order_billing_repository.dart';
 import '../../PriceList/model/price_item_model.dart';
 
 class OrderDetailViewModel extends ChangeNotifier {
+  final OrderBillingRepository _repository = OrderBillingRepository();
+  
   List<BillingItem> _billingItems = [];
   double _totalAmount = 0.0;
+  OrderBillingModel? _currentBilling;
+  bool _isSaving = false;
+  String? _errorMessage;
 
   List<BillingItem> get billingItems => _billingItems;
   double get totalAmount => _totalAmount;
+  OrderBillingModel? get currentBilling => _currentBilling;
+  bool get isSaving => _isSaving;
+  String? get errorMessage => _errorMessage;
+  
+  // Check if payment has been set
+  bool get isPaymentSet => _currentBilling != null;
+  
+  // Get payment status
+  String get paymentStatus => _currentBilling?.paymentStatus ?? 'pending';
 
   // Get items that have quantity > 0
   List<BillingItem> get addedItems =>
@@ -93,5 +109,121 @@ class OrderDetailViewModel extends ChangeNotifier {
       'itemCount': addedItems.length,
       'totalQuantity': addedItems.fold(0, (sum, item) => sum + item.quantity),
     };
+  }
+
+  // Load existing billing details
+  Future<void> loadBillingDetails(String userId, String scheduleId) async {
+    try {
+      _currentBilling = await _repository.getLatestBilling(userId, scheduleId);
+      notifyListeners();
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+    }
+  }
+
+  // Save billing details to Firebase
+  Future<bool> saveBillingDetails({
+    required String userId,
+    required String scheduleId,
+    required String serviceType,
+    required String washType,
+  }) async {
+    if (addedItems.isEmpty) {
+      _errorMessage = 'Please add items to the bill before saving';
+      notifyListeners();
+      return false;
+    }
+
+    _isSaving = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      // Convert billing items to billing item data
+      final billingItemsData = addedItems.map((item) {
+        return BillingItemData(
+          itemId: item.priceItem.itemId,
+          itemName: item.priceItem.itemName,
+          priceType: item.priceType,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          itemTotal: item.itemTotal,
+        );
+      }).toList();
+
+      // Create billing model
+      final billing = OrderBillingModel(
+        billingId: DateTime.now().millisecondsSinceEpoch.toString(),
+        scheduleId: scheduleId,
+        userId: userId,
+        serviceType: serviceType,
+        washType: washType,
+        items: billingItemsData,
+        totalAmount: _totalAmount,
+        paymentStatus: 'pay_request',
+        createdAt: DateTime.now(),
+      );
+
+      // Save to Firebase
+      await _repository.saveBillingDetails(billing);
+      
+      _currentBilling = billing;
+      _isSaving = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = 'Failed to save billing: ${e.toString()}';
+      _isSaving = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  // Update payment status
+  Future<bool> updatePaymentStatus(
+    String userId,
+    String scheduleId,
+    String status,
+  ) async {
+    if (_currentBilling == null) return false;
+
+    _isSaving = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _repository.updatePaymentStatus(
+        userId,
+        scheduleId,
+        status,
+      );
+
+      _currentBilling = _currentBilling!.copyWith(
+        paymentStatus: status,
+        updatedAt: DateTime.now(),
+      );
+
+      _isSaving = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = 'Failed to update status: ${e.toString()}';
+      _isSaving = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  // Clear error message
+  void clearError() {
+    _errorMessage = null;
+    notifyListeners();
+  }
+
+  // Reset billing state
+  void resetBilling() {
+    _currentBilling = null;
+    notifyListeners();
   }
 }
