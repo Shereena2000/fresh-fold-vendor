@@ -177,7 +177,7 @@ class LoginScreen extends StatelessWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: PColors.darkGray,
+          backgroundColor: PColors.secondoryColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -194,7 +194,7 @@ class LoginScreen extends StatelessWidget {
                 controller: emailController,
                 hintText: "Email Address",
                 keyboardType: TextInputType.emailAddress,
-                filColor: PColors.darkGray,
+                filColor: PColors.white,
               ),
             ],
           ),

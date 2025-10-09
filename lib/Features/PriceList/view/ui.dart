@@ -126,7 +126,7 @@ class ShopkeeperPriceTable extends StatelessWidget {
                   ),
                 ),
 
-                // Items List
+                // Items Table
                 Expanded(
                   child: items.isEmpty
                       ? Center(
@@ -158,20 +158,73 @@ class ShopkeeperPriceTable extends StatelessWidget {
                             ],
                           ),
                         )
-                      : ReorderableListView.builder(
-                          padding: EdgeInsets.all(16),
-                          itemCount: items.length,
-                          onReorder: (oldIndex, newIndex) {
-                            if (newIndex > oldIndex) newIndex--;
-                            final reorderedItems = List<PriceItemModel>.from(items);
-                            final item = reorderedItems.removeAt(oldIndex);
-                            reorderedItems.insert(newIndex, item);
-                            priceProvider.reorderItems(category, reorderedItems);
-                          },
-                          itemBuilder: (context, index) {
-                            final item = items[index];
-                            return _buildItemCard(context, category, item, index);
-                          },
+                      : SingleChildScrollView(
+                          child: Container(
+                            margin: EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.grey[300]!),
+                            ),
+                            child: Column(
+                              children: [
+                                // Table Header
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Color(0xFF013E6A),
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(12),
+                                      topRight: Radius.circular(12),
+                                    ),
+                                  ),
+                                  child: Table(
+                                    columnWidths: {
+                                      0: FlexColumnWidth(2),
+                                      1: FlexColumnWidth(2),
+                                      2: FlexColumnWidth(2),
+                                      3: FlexColumnWidth(2),
+                                      4: FixedColumnWidth(70),
+                                    },
+                                    children: [
+                                      TableRow(
+                                        children: [
+                                          _buildHeaderCell('Item Name'),
+                                          _buildHeaderCell('Dry Wash'),
+                                          _buildHeaderCell('Wet Wash'),
+                                          _buildHeaderCell('Steam Press'),
+                                          _buildHeaderCell('Action'),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                // Table Body
+                                Table(
+                                  columnWidths: {
+                                    0: FlexColumnWidth(3),
+                                    1: FlexColumnWidth(2),
+                                    2: FlexColumnWidth(2),
+                                    3: FlexColumnWidth(2),
+                                    4: FixedColumnWidth(60),
+                                  },
+                                  children: items
+                                      .asMap()
+                                      .entries
+                                      .map((entry) {
+                                    int index = entry.key;
+                                    PriceItemModel item = entry.value;
+                                    bool isEven = index % 2 == 0;
+                                    return _buildTableRow(
+                                      context,
+                                      category,
+                                      item,
+                                      isEven,
+                                    );
+                                  }).toList(),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                 ),
               ],
@@ -182,100 +235,123 @@ class ShopkeeperPriceTable extends StatelessWidget {
     );
   }
 
-  Widget _buildItemCard(
-    BuildContext context,
-    String category,
-    PriceItemModel item,
-    int index,
-  ) {
-    return Card(
-      key: ValueKey(item.itemId),
-      margin: EdgeInsets.only(bottom: 12),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: ListTile(
-        contentPadding: EdgeInsets.all(16),
-        leading: CircleAvatar(
-          backgroundColor: Color(0xFF013E6A),
-          child: Icon(Icons.drag_handle, color: Colors.white),
+  Widget _buildHeaderCell(String text) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w700,
+          color: Colors.white,
         ),
-        title: Text(
-          item.itemName,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-            color: Color(0xFF013E6A),
-          ),
-        ),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildPriceRow('Dry Wash', item.dryWash),
-              SizedBox(height: 4),
-              _buildPriceRow('Wet Wash', item.wetWash),
-              SizedBox(height: 4),
-              _buildPriceRow('Steam Press', item.steamPress),
-            ],
-          ),
-        ),
-        trailing: PopupMenuButton<String>(
-          onSelected: (value) {
-            if (value == 'edit') {
-              _showAddEditDialog(context, category, item);
-            } else if (value == 'delete') {
-              _showDeleteDialog(context, category, item);
-            }
-          },
-          itemBuilder: (context) => [
-            PopupMenuItem(
-              value: 'edit',
-              child: Row(
-                children: [
-                  Icon(Icons.edit, size: 20, color: Colors.blue),
-                  SizedBox(width: 8),
-                  Text('Edit'),
-                ],
-              ),
-            ),
-            PopupMenuItem(
-              value: 'delete',
-              child: Row(
-                children: [
-                  Icon(Icons.delete, size: 20, color: Colors.red),
-                  SizedBox(width: 8),
-                  Text('Delete'),
-                ],
-              ),
-            ),
-          ],
-        ),
+        textAlign: TextAlign.center,
       ),
     );
   }
 
-  Widget _buildPriceRow(String label, String price) {
-    return Row(
+  TableRow _buildTableRow(
+    BuildContext context,
+    String category,
+    PriceItemModel item,
+    bool isEven,
+  ) {
+    Color bgColor = isEven ? Colors.grey[50]! : Colors.white;
+
+    return TableRow(
+      decoration: BoxDecoration(color: bgColor),
       children: [
-        Text(
-          '$label: ',
-          style: TextStyle(
-            fontSize: 13,
-            color: Colors.grey[600],
-          ),
+        // Item Name
+        _buildDataCell(
+          item.itemName,
+          TextAlign.left,
+          fontWeight: FontWeight.w600,
+          color: Color(0xFF013E6A),
         ),
-        Text(
-          '₹$price',
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: Colors.green[700],
+        // Dry Wash Price
+        _buildPriceCell('₹${item.dryWash}', Colors.blue),
+        // Wet Wash Price
+        _buildPriceCell('₹${item.wetWash}', Colors.green),
+        // Steam Press Price
+        _buildPriceCell('₹${item.steamPress}', Colors.orange),
+        // Action Menu
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 8),
+          child: Center(
+            child: PopupMenuButton<String>(
+              icon: Icon(
+                Icons.more_vert,
+                color: Color(0xFF013E6A),
+                size: 24,
+              ),
+              onSelected: (value) {
+                if (value == 'edit') {
+                  _showAddEditDialog(context, category, item);
+                } else if (value == 'delete') {
+                  _showDeleteDialog(context, category, item);
+                }
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: 'edit',
+                  child: Row(
+                    children: [
+                      Icon(Icons.edit, size: 18, color: Colors.blue),
+                      SizedBox(width: 8),
+                      Text('Edit'),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete, size: 18, color: Colors.red),
+                      SizedBox(width: 8),
+                      Text('Delete'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildDataCell(
+    String text,
+    TextAlign align, {
+    FontWeight fontWeight = FontWeight.normal,
+    Color? color,
+  }) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: fontWeight,
+          color: color ?? Colors.black87,
+        ),
+        textAlign: align,
+      ),
+    );
+  }
+
+  Widget _buildPriceCell(String price, MaterialColor color) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+      child: Text(
+        price,
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: Colors.black87,
+        ),
+        textAlign: TextAlign.center,
+      ),
     );
   }
 

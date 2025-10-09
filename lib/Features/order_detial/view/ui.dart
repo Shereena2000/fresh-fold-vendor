@@ -343,7 +343,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                 SizedBox(height: 16),
                                 _buildDetailRow(
                                   'Name',
-                                  customer!.fullName ?? 'N/A',
+                                  customer!.fullName ?? 'Not Applicable',
                                   Icons.person,
                                 ),
                                 _buildDetailRow(
@@ -351,15 +351,39 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                   customer!.phoneNumber,
                                   Icons.phone,
                                 ),
+                                if (customer!.alternativePhone != null && customer!.alternativePhone!.isNotEmpty)
+                                  _buildDetailRow(
+                                    'Alternative Phone',
+                                    customer!.alternativePhone!,
+                                    Icons.phone_android,
+                                  ),
                                 _buildDetailRow(
                                   'Email',
-                                  customer!.email ?? 'N/A',
+                                  customer!.email ?? 'Not Applicable',
                                   Icons.email,
                                 ),
+                                if (customer!.gender != null && customer!.gender!.isNotEmpty)
+                                  _buildDetailRow(
+                                    'Gender',
+                                    _formatGender(customer!.gender!),
+                                    Icons.person_outline,
+                                  ),
+                                if (customer!.dateOfBirth != null)
+                                  _buildDetailRow(
+                                    'Date of Birth',
+                                    DateFormat('dd MMM yyyy').format(customer!.dateOfBirth!),
+                                    Icons.cake,
+                                  ),
+                                if (customer!.profession != null && customer!.profession!.isNotEmpty)
+                                  _buildDetailRow(
+                                    'Profession',
+                                    customer!.profession!,
+                                    Icons.work,
+                                  ),
                                 _buildDetailRow(
-                                  'City',
-                                  customer!.city ?? 'N/A',
-                                  Icons.location_city,
+                                  'Location',
+                                  customer!.location ?? 'Not Applicable',
+                                  Icons.location_on,
                                 ),
                               ],
                             ),
@@ -806,6 +830,19 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         return 'Steam Press Only';
       default:
         return type;
+    }
+  }
+
+  String _formatGender(String gender) {
+    switch (gender.toLowerCase()) {
+      case 'male':
+        return 'Male';
+      case 'female':
+        return 'Female';
+      case 'other':
+        return 'Other';
+      default:
+        return gender;
     }
   }
 
