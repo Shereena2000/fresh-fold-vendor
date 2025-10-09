@@ -172,6 +172,7 @@ class AuthViewModel extends ChangeNotifier {
       // Clear all data after successful logout
       clearLoginData();
       clearSignupData();
+      _currentVendor = null; // Clear vendor data
       
       _isLoading = false;
       notifyListeners();

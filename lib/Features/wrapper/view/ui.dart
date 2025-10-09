@@ -9,14 +9,27 @@ import '../../home/view/ui.dart';
 import '../../order_mangement/view/ui.dart';
 import '../view_model/navigation_provider.dart';
 
-class WrapperScreen extends StatelessWidget {
+class WrapperScreen extends StatefulWidget {
   WrapperScreen({super.key});
+
+  @override
+  State<WrapperScreen> createState() => _WrapperScreenState();
+}
+
+class _WrapperScreenState extends State<WrapperScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Always reset to home screen when wrapper is initialized
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<NavigationProvider>().resetIndex();
+    });
+  }
 
   final List<Widget> _pages = [
     HomeScreen(),
     OrderScreen(),
     PriceListScreen(),
-
     MenuScreen(),
   ];
 
@@ -26,7 +39,6 @@ class WrapperScreen extends StatelessWidget {
       NavItem(icon: Icons.home, label: 'Home'),
       NavItem(icon: Icons.shopping_bag, label: 'Orders'),
       NavItem(icon: Icons.list_alt, label: 'Price List'),
-
       NavItem(icon: Icons.menu, label: 'Menu'),
     ];
 

@@ -6,6 +6,7 @@ import 'package:fresh_fold_shop_keeper/Settings/utils/p_text_styles.dart';
 import 'package:provider/provider.dart';
 
 import '../../auth/model/vendor_model.dart';
+import '../../wrapper/view_model/navigation_provider.dart';
 import '../view_model/menu_view_model.dart';
 
 class MenuScreen extends StatelessWidget {
@@ -61,6 +62,11 @@ class MenuScreen extends StatelessWidget {
     }
 
     if (success) {
+      // Reset navigation to home screen for next login
+      if (context.mounted) {
+        Provider.of<NavigationProvider>(context, listen: false).resetIndex();
+      }
+      
       // Navigate to login screen and remove all previous routes
       if (context.mounted) {
         Navigator.of(context).pushNamedAndRemoveUntil(
