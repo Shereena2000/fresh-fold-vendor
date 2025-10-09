@@ -1,10 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../model/vendor_model.dart';
 import '../repositories/auth_repositories.dart';
 
 class AuthViewModel extends ChangeNotifier {
   final AuthRepository _repository = AuthRepository();
+  
+  VendorModel? _currentVendor;
+  VendorModel? get currentVendor => _currentVendor;
 
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
@@ -52,11 +56,13 @@ class AuthViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      UserCredential userCredential = await _repository.signInWithEmail(
+      await _repository.signInWithEmail(
         email: emailController.text.trim(),
         password: passwordController.text,
       );
 
+      // Load vendor data after successful login
+      await loadVendorData();
 
       _isLoading = false;
       notifyListeners();
@@ -154,6 +160,40 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
+  /// Sign out the current user
+  Future<bool> signOut() async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _repository.signOut();
+      
+      // Clear all data after successful logout
+      clearLoginData();
+      clearSignupData();
+      
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Check if user is currently signed in
+  bool isUserSignedIn() {
+    return _repository.isUserSignedIn();
+  }
+
+  /// Get current user
+  User? getCurrentUser() {
+    return _repository.getCurrentUser();
+  }
+
   bool _isValidEmail(String email) {
     return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
   }
@@ -186,14 +226,13 @@ class AuthViewModel extends ChangeNotifier {
   @override
   void dispose() {
     emailController.dispose();
-
     usernameController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
-
     super.dispose();
   }
-    /// Send password reset email
+
+  /// Send password reset email
   Future<bool> sendPasswordResetEmail(String email) async {
     if (email.isEmpty) {
       _errorMessage = 'Please enter your email address';
@@ -215,5 +254,28 @@ class AuthViewModel extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  /// Load vendor data from Firebase
+  Future<void> loadVendorData() async {
+    User? user = getCurrentUser();
+    if (user == null) return;
+
+    try {
+      _currentVendor = await _repository.getVendorData(user.uid);
+      notifyListeners();
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+    }
+  }
+
+  /// Stream vendor data for real-time updates
+  Stream<VendorModel?> streamVendorData() {
+    User? user = getCurrentUser();
+    if (user == null) {
+      return Stream.value(null);
+    }
+    return _repository.streamVendorData(user.uid);
   }
 }

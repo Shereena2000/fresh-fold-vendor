@@ -2,8 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fresh_fold_shop_keeper/Features/auth/model/vendor_model.dart';
 
-// import '../model/user_model.dart';
-
 class AuthRepository {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -52,6 +50,25 @@ class AuthRepository {
     await saveVendorData(vendor);
   }
 
+  /// Sign out the current user
+  Future<void> signOut() async {
+    try {
+      await _firebaseAuth.signOut();
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthException(e);
+    }
+  }
+
+  /// Get current user
+  User? getCurrentUser() {
+    return _firebaseAuth.currentUser;
+  }
+
+  /// Check if user is signed in
+  bool isUserSignedIn() {
+    return _firebaseAuth.currentUser != null;
+  }
+
   String _handleAuthException(FirebaseAuthException e) {
     switch (e.code) {
       case 'weak-password':
@@ -97,5 +114,36 @@ class AuthRepository {
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
     }
+  }
+
+  /// Get vendor data from Firestore
+  Future<VendorModel?> getVendorData(String uid) async {
+    try {
+      DocumentSnapshot doc = await _firestore
+          .collection('vendor')
+          .doc(uid)
+          .get();
+
+      if (doc.exists) {
+        return VendorModel.fromMap(doc.data() as Map<String, dynamic>);
+      }
+      return null;
+    } catch (e) {
+      throw Exception('Failed to load vendor data: $e');
+    }
+  }
+
+  /// Stream vendor data for real-time updates
+  Stream<VendorModel?> streamVendorData(String uid) {
+    return _firestore
+        .collection('vendor')
+        .doc(uid)
+        .snapshots()
+        .map((snapshot) {
+      if (snapshot.exists) {
+        return VendorModel.fromMap(snapshot.data() as Map<String, dynamic>);
+      }
+      return null;
+    });
   }
 }

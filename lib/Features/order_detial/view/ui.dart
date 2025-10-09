@@ -71,6 +71,17 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   }
 
   Future<void> _handleSetPayment(OrderDetailViewModel billingViewModel) async {
+    // Check if order is cancelled
+    if (widget.schedule.status.toLowerCase() == 'cancelled') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Cannot set payment for cancelled order'),
+          backgroundColor: PColors.errorRed,
+        ),
+      );
+      return;
+    }
+
     // Check if items are added
     if (billingViewModel.addedItems.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -165,7 +176,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   }
 
   Future<void> _updateStatus(String newStatus) async {
-    final viewModel = context.read<ShopkeeperOrderViewModel>();
+    final orderViewModel = context.read<ShopkeeperOrderViewModel>();
+    final billingViewModel = context.read<OrderDetailViewModel>();
 
     showDialog(
       context: context,
@@ -173,11 +185,29 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       builder: (context) => Center(child: CircularProgressIndicator()),
     );
 
-    await viewModel.updateOrderStatus(
+    // Update order status
+    await orderViewModel.updateOrderStatus(
       widget.schedule.userId,
       widget.schedule.scheduleId,
       newStatus,
     );
+
+    // Sync payment status with order status
+    if (billingViewModel.isPaymentSet) {
+      if (newStatus.toLowerCase() == 'cancelled') {
+        await billingViewModel.updatePaymentStatus(
+          widget.schedule.userId,
+          widget.schedule.scheduleId,
+          'cancelled',
+        );
+      } else if (newStatus.toLowerCase() == 'paid') {
+        await billingViewModel.updatePaymentStatus(
+          widget.schedule.userId,
+          widget.schedule.scheduleId,
+          'paid',
+        );
+      }
+    }
 
     Navigator.pop(context); // Close loading dialog
     Navigator.pop(context); // Go back to list
@@ -935,32 +965,51 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     bool isDisabled = false;
     VoidCallback? onPressed;
 
+    final orderStatus = widget.schedule.status.toLowerCase();
     final paymentStatus = billingViewModel.paymentStatus;
     final hasItems = billingViewModel.addedItems.isNotEmpty;
 
-    switch (paymentStatus) {
-      case 'pay_request':
-        buttonText = 'Payment Request Sent';
-        gradientColors = [Colors.orange, Colors.deepOrange];
-        isDisabled = true;
-        break;
-      case 'paid':
-        buttonText = 'Payment Completed ✓';
-        gradientColors = [
-          PColors.successGreen,
-          PColors.successGreen.withOpacity(0.7)
-        ];
-        isDisabled = true;
-        break;
-      case 'cancelled':
-        buttonText = 'Payment Cancelled';
-        gradientColors = [PColors.errorRed, PColors.errorRed.withOpacity(0.7)];
-        isDisabled = true;
-        break;
-      default:
-        buttonText = hasItems ? 'Set Payment Amount' : 'Add Items First';
-        isDisabled = !hasItems;
-        gradientColors = null;
+    // Check if order is cancelled - disable payment button
+    if (orderStatus == 'cancelled') {
+      buttonText = 'Order Cancelled';
+      gradientColors = [PColors.lightGray, PColors.lightGray];
+      isDisabled = true;
+    }
+    // Check if order is already marked as paid
+    else if (orderStatus == 'paid') {
+      buttonText = 'Order Paid ✓';
+      gradientColors = [
+        PColors.successGreen,
+        PColors.successGreen.withOpacity(0.7)
+      ];
+      isDisabled = true;
+    }
+    // Check payment status
+    else {
+      switch (paymentStatus) {
+        case 'pay_request':
+          buttonText = 'Payment Request Sent';
+          gradientColors = [Colors.orange, Colors.deepOrange];
+          isDisabled = true;
+          break;
+        case 'paid':
+          buttonText = 'Payment Completed ✓';
+          gradientColors = [
+            PColors.successGreen,
+            PColors.successGreen.withOpacity(0.7)
+          ];
+          isDisabled = true;
+          break;
+        case 'cancelled':
+          buttonText = 'Payment Cancelled';
+          gradientColors = [PColors.errorRed, PColors.errorRed.withOpacity(0.7)];
+          isDisabled = true;
+          break;
+        default:
+          buttonText = hasItems ? 'Set Payment Amount' : 'Add Items First';
+          isDisabled = !hasItems;
+          gradientColors = null;
+      }
     }
 
     onPressed = isDisabled ? null : () => _handleSetPayment(billingViewModel);
@@ -979,11 +1028,13 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
               ),
             )
-          : paymentStatus == 'paid'
+          : (orderStatus == 'paid' || paymentStatus == 'paid')
               ? Icon(Icons.check_circle, color: Colors.white, size: 20)
               : paymentStatus == 'pay_request'
                   ? Icon(Icons.pending, color: Colors.white, size: 20)
-                  : Icon(Icons.payment, color: Colors.white, size: 20),
+                  : orderStatus == 'cancelled'
+                      ? Icon(Icons.block, color: Colors.white, size: 20)
+                      : Icon(Icons.payment, color: Colors.white, size: 20),
     );
   }
 }

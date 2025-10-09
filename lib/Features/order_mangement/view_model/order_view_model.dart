@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../model/client_model.dart';
@@ -31,7 +32,9 @@ class ShopkeeperOrderViewModel extends ChangeNotifier {
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
 
-  /// Fetch all orders and categorize them
+  StreamSubscription<List<ScheduleModel>>? _ordersSubscription;
+
+  /// Fetch all orders and categorize them (one-time fetch)
   Future<void> fetchAllOrders() async {
     _isLoading = true;
     _errorMessage = null;
@@ -48,6 +51,34 @@ class ShopkeeperOrderViewModel extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  /// Start listening to real-time order updates
+  void startListeningToOrders() {
+    _isLoading = true;
+    notifyListeners();
+
+    _ordersSubscription?.cancel(); // Cancel any existing subscription
+    
+    _ordersSubscription = _repository.streamAllOrders().listen(
+      (allOrders) {
+        _categorizeOrders(allOrders);
+        _isLoading = false;
+        _errorMessage = null;
+        notifyListeners();
+      },
+      onError: (error) {
+        _errorMessage = 'Failed to load orders: $error';
+        _isLoading = false;
+        notifyListeners();
+      },
+    );
+  }
+
+  /// Stop listening to order updates
+  void stopListeningToOrders() {
+    _ordersSubscription?.cancel();
+    _ordersSubscription = null;
   }
 
   /// Categorize orders by status
@@ -87,5 +118,11 @@ class ShopkeeperOrderViewModel extends ChangeNotifier {
   void clearError() {
     _errorMessage = null;
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    stopListeningToOrders();
+    super.dispose();
   }
 }

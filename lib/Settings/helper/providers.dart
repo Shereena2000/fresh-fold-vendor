@@ -6,6 +6,7 @@ import 'package:provider/single_child_widget.dart';
 import '../../Features/PriceList/view_model/price_view.model.dart';
 import '../../Features/wrapper/view_model/navigation_provider.dart';
 import '../../Features/order_detial/view_model.dart/oder_detail_view_model.dart';
+import '../../Features/menu/view_model/menu_view_model.dart';
 
 List<SingleChildWidget> providers = [
   ChangeNotifierProvider(create: (_) => AuthViewModel()),
@@ -13,4 +14,9 @@ List<SingleChildWidget> providers = [
   ChangeNotifierProvider(create: (_) => ShopkeeperOrderViewModel()),
   ChangeNotifierProvider(create: (_) => PriceViewModel()),
   ChangeNotifierProvider(create: (_) => OrderDetailViewModel()),
+  ChangeNotifierProxyProvider<AuthViewModel, MenuViewModel>(
+    create: (context) => MenuViewModel(context.read<AuthViewModel>()),
+    update: (context, authViewModel, previous) => 
+        previous ?? MenuViewModel(authViewModel),
+  ),
 ];

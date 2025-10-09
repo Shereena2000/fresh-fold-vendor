@@ -15,9 +15,17 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    // Start listening to real-time order updates
     Future.microtask(() {
-      context.read<ShopkeeperOrderViewModel>().fetchAllOrders();
+      context.read<ShopkeeperOrderViewModel>().startListeningToOrders();
     });
+  }
+
+  @override
+  void dispose() {
+    // Stop listening when screen is disposed
+    context.read<ShopkeeperOrderViewModel>().stopListeningToOrders();
+    super.dispose();
   }
 
   @override
@@ -25,9 +33,16 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: PColors.scaffoldColor,
       appBar: AppBar(
-        title: Text(
-          'Dashboard',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+        title: Row(
+          children: [
+            Text(
+              'Dashboard',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+            ),
+            SizedBox(width: 8),
+            // Real-time indicator
+            Icon(Icons.circle, size: 8, color: Colors.greenAccent),
+          ],
         ),
         backgroundColor: PColors.primaryColor,
         foregroundColor: Colors.white,
@@ -36,8 +51,10 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: Icon(Icons.refresh),
             onPressed: () {
-              context.read<ShopkeeperOrderViewModel>().fetchAllOrders();
+              // Manual refresh - restart the listener
+              context.read<ShopkeeperOrderViewModel>().startListeningToOrders();
             },
+            tooltip: 'Refresh',
           ),
         ],
       ),
@@ -50,7 +67,10 @@ class _HomeScreenState extends State<HomeScreen> {
           }
 
           return RefreshIndicator(
-            onRefresh: () => viewModel.fetchAllOrders(),
+            onRefresh: () async {
+              // Restart real-time listener on pull-to-refresh
+              viewModel.startListeningToOrders();
+            },
             child: SingleChildScrollView(
               physics: AlwaysScrollableScrollPhysics(),
               child: Padding(
@@ -297,10 +317,12 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(
             padding: EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: bgColor,
+              color:    
+                      Colors.blue.withOpacity(0.1),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(icon, color: color, size: 28),
+            child: Icon(icon, color:     Colors.blue,
+                      size: 28),
           ),
           SizedBox(width: 16),
           Expanded(
@@ -321,13 +343,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w700,
-                    color: color,
+                    color:     Colors.blue,
+                     
                   ),
                 ),
               ],
             ),
           ),
-          Icon(Icons.arrow_forward_ios, color: color, size: 20),
+      
         ],
       ),
     );
