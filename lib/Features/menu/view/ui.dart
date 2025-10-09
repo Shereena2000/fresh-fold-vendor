@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import '../../auth/model/vendor_model.dart';
 import '../../wrapper/view_model/navigation_provider.dart';
 import '../view_model/menu_view_model.dart';
+import '../../promos/view/promo_screen.dart';
 
 class MenuScreen extends StatelessWidget {
   const MenuScreen({super.key});
@@ -161,6 +162,19 @@ class MenuScreen extends StatelessWidget {
                   ),
                   child: Column(
                     children: [
+                      _buildMenuTile(
+                        context: context,
+                        title: "Manage Promos",
+                        icon: Icons.campaign_outlined,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PromoManagementScreen(),
+                            ),
+                          );
+                        },
+                      ),
                       _buildMenuTile(
                         context: context,
                         title: "Privacy Policy",

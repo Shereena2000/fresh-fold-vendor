@@ -1,0 +1,82 @@
+===============================================
+  PROMO UPLOAD FEATURE - SETUP INSTRUCTIONS
+===============================================
+
+✅ API KEY: 692484724374318 (Already configured)
+✅ API SECRET: hIZ6N5OjvIFXks9wWAAcveYA8v8 (Already configured)
+⚠️  CLOUD NAME: You need to add this!
+
+-----------------------------------------------
+STEP 1: Find Your Cloudinary Cloud Name
+-----------------------------------------------
+
+1. Go to: https://cloudinary.com/console
+2. Login to your account
+3. Look at the top of the dashboard - you'll see:
+   "Cloud name: xxxxxxxx"
+4. Copy that cloud name
+
+-----------------------------------------------
+STEP 2: Create .env File
+-----------------------------------------------
+
+Create a file called ".env" in the project root:
+/Users/shereenamj/Flutter/Earning_Fish/fresh_fold_shop_keeper/.env
+
+Add this content (replace YOUR_CLOUD_NAME):
+
+CLOUDINARY_CLOUD_NAME=YOUR_CLOUD_NAME
+CLOUDINARY_API_KEY=692484724374318
+CLOUDINARY_API_SECRET=hIZ6N5OjvIFXks9wWAAcveYA8v8
+CLOUDINARY_UPLOAD_PRESET=fresh-fold
+
+-----------------------------------------------
+STEP 3: Configure Upload Preset in Cloudinary
+-----------------------------------------------
+
+1. Go to Cloudinary Dashboard
+2. Click Settings → Upload
+3. Scroll to "Upload presets"
+4. Click "Add upload preset"
+5. Set:
+   - Preset name: fresh-fold
+   - Signing Mode: Unsigned
+   - Folder: fresh_fold/promos
+6. Save
+
+-----------------------------------------------
+STEP 4: Run the App
+-----------------------------------------------
+
+flutter pub get
+flutter run
+
+-----------------------------------------------
+HOW TO USE
+-----------------------------------------------
+
+1. Open app → Go to Menu
+2. Click "Manage Promos"
+3. Click "Upload Promo Image"
+4. Choose Gallery or Camera
+5. Select/Take photo
+6. Confirm upload
+7. Image uploads to Cloudinary
+8. URL saves to Firebase 'promos' collection
+
+-----------------------------------------------
+FIREBASE STRUCTURE
+-----------------------------------------------
+
+promos/{promoId}
+  ├─ promoId: "timestamp"
+  ├─ imageUrl: "https://res.cloudinary.com/..."
+  ├─ publicId: "fresh_fold/promos/abc123"
+  ├─ uploadedBy: "vendorUid"
+  └─ createdAt: timestamp
+
+Client app can read this to show promos!
+
+===============================================
+
+
