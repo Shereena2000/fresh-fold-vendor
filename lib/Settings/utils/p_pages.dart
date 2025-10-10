@@ -5,4 +5,5 @@ class PPages {
   static const String login = "/login";
   static const String wrapperPageUi = "/wrapperPageUi";
 static const String orderDetailPageUi = "/orderDetailPageUi";
+static const String privacyPageUi = "/privacyPageUi";
 }

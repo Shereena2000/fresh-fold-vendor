@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fresh_fold_shop_keeper/Settings/common/widgets/custom_app_bar.dart';
 import 'package:fresh_fold_shop_keeper/Settings/common/widgets/custom_outline_button.dart';
 import 'package:fresh_fold_shop_keeper/Settings/utils/p_colors.dart';
+import 'package:fresh_fold_shop_keeper/Settings/utils/p_pages.dart';
 import 'package:fresh_fold_shop_keeper/Settings/utils/p_text_styles.dart';
 import 'package:provider/provider.dart';
 
@@ -30,10 +31,7 @@ class MenuScreen extends StatelessWidget {
                 Navigator.of(dialogContext).pop();
                 await _handleLogout(context);
               },
-              child: const Text(
-                'Logout',
-                style: TextStyle(color: Colors.red),
-              ),
+              child: const Text('Logout', style: TextStyle(color: Colors.red)),
             ),
           ],
         );
@@ -49,9 +47,7 @@ class MenuScreen extends StatelessWidget {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
+        return const Center(child: CircularProgressIndicator());
       },
     );
 
@@ -67,7 +63,7 @@ class MenuScreen extends StatelessWidget {
       if (context.mounted) {
         Provider.of<NavigationProvider>(context, listen: false).resetIndex();
       }
-      
+
       // Navigate to login screen and remove all previous routes
       if (context.mounted) {
         Navigator.of(context).pushNamedAndRemoveUntil(
@@ -122,8 +118,9 @@ class MenuScreen extends StatelessWidget {
                           child: Center(
                             child: Text(
                               menuViewModel.getInitials(),
-                              style: PTextStyles.displayMedium
-                                  .copyWith(color: PColors.white),
+                              style: PTextStyles.displayMedium.copyWith(
+                                color: PColors.white,
+                              ),
                             ),
                           ),
                         ),
@@ -135,8 +132,9 @@ class MenuScreen extends StatelessWidget {
                               // Vendor Name
                               Text(
                                 menuViewModel.getVendorName(),
-                                style: PTextStyles.headlineMedium
-                                    .copyWith(color: PColors.black),
+                                style: PTextStyles.headlineMedium.copyWith(
+                                  color: PColors.black,
+                                ),
                               ),
                               const SizedBox(height: 4),
                               // Vendor Email
@@ -179,7 +177,8 @@ class MenuScreen extends StatelessWidget {
                         context: context,
                         title: "Privacy Policy",
                         icon: Icons.privacy_tip_outlined,
-                        onTap: () => _showPrivacyPolicy(context),
+                        onTap: () =>
+                            Navigator.pushNamed(context, PPages.privacyPageUi),
                       ),
                     ],
                   ),
@@ -195,7 +194,7 @@ class MenuScreen extends StatelessWidget {
                     CustomOutlineButton(
                       onPressed: () => _showLogoutDialog(context),
                       text: "Log Out",
-                    )
+                    ),
                   ],
                 ),
               ],
@@ -206,78 +205,6 @@ class MenuScreen extends StatelessWidget {
     );
   }
 
-  void _showPrivacyPolicy(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: Row(
-            children: [
-              Icon(Icons.privacy_tip_outlined, color: PColors.primaryColor),
-              const SizedBox(width: 12),
-              Text(
-                'Privacy Policy',
-                style: PTextStyles.headlineMedium,
-              ),
-            ],
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Data Collection',
-                  style: PTextStyles.bodyMedium
-                      .copyWith(fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'We collect and store information necessary to provide our laundry services, including customer orders, payment details, and delivery information.',
-                  style: PTextStyles.bodySmall,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Data Usage',
-                  style: PTextStyles.bodyMedium
-                      .copyWith(fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Your data is used exclusively for order management, customer service, and improving our application. We do not share your data with third parties without consent.',
-                  style: PTextStyles.bodySmall,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Data Security',
-                  style: PTextStyles.bodyMedium
-                      .copyWith(fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'We implement industry-standard security measures to protect your data using Firebase security protocols.',
-                  style: PTextStyles.bodySmall,
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(
-                'Close',
-                style: TextStyle(color: PColors.primaryColor),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   Widget _buildMenuTile({
     required BuildContext context,
     required String title,
@@ -285,27 +212,13 @@ class MenuScreen extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     return ListTile(
-      leading: Icon(
-        icon,
-        color: Colors.blue.shade600,
-        size: 22,
-      ),
-      title: Text(
-        title,
-        style: PTextStyles.bodyMedium,
-      ),
-      trailing: Icon(
-        Icons.chevron_right,
-        color: PColors.black,
-        size: 24,
-      ),
+      leading: Icon(icon, color: Colors.blue.shade600, size: 22),
+      title: Text(title, style: PTextStyles.bodyMedium),
+      trailing: Icon(Icons.chevron_right, color: PColors.black, size: 24),
       onTap: onTap,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       shape: Border(
-        bottom: BorderSide(
-          color: Colors.grey.shade200,
-          width: 0.5,
-        ),
+        bottom: BorderSide(color: Colors.grey.shade200, width: 0.5),
       ),
     );
   }

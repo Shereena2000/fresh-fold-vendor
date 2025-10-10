@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
         appBarTheme: AppBarTheme(
           backgroundColor: PColors.colorFFFFFF,
           surfaceTintColor: PColors.colorFFFFFF,
-          foregroundColor: PColors.black,
+          foregroundColor: PColors.white,
           centerTitle: false,
         ),
       ),

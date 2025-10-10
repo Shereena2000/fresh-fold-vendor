@@ -3,6 +3,7 @@ import 'package:fresh_fold_shop_keeper/Features/auth/view/sigin.dart';
 import 'package:fresh_fold_shop_keeper/Features/auth/view/sign_up.dart';
 import 'package:fresh_fold_shop_keeper/Features/order_detial/view/ui.dart';
 import 'package:fresh_fold_shop_keeper/Features/order_mangement/model/shedule_model.dart';
+import 'package:fresh_fold_shop_keeper/Features/privacry_policy/view/ui.dart';
 import 'package:fresh_fold_shop_keeper/Features/wrapper/view/ui.dart';
 
 import '../../Features/splash/view/splash_screen.dart';
@@ -23,6 +24,11 @@ class Routes {
         return MaterialPageRoute(
           builder: (context) =>
               OrderDetailScreen(schedule: settings.arguments as ScheduleModel),
+        );
+  case PPages.privacyPageUi:
+        return MaterialPageRoute(
+          builder: (context) =>
+              PrivacyPolicyScreen(),
         );
 
       default:
