@@ -10,6 +10,7 @@ import '../../order_mangement/model/shedule_model.dart';
 import '../../order_mangement/view_model/order_view_model.dart';
 import '../../PriceList/view_model/price_view.model.dart';
 import '../model/billing_item.dart';
+import '../model/order_billing_model.dart';
 import '../view_model.dart/oder_detail_view_model.dart';
 
 class OrderDetailScreen extends StatefulWidget {
@@ -434,27 +435,58 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                       color: PColors.primaryColor,
                                     ),
                                   ),
-                                  Container(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 6,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: PColors.primaryColor.withOpacity(
-                                        0.1,
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 6,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: PColors.primaryColor.withOpacity(
+                                            0.1,
+                                          ),
+                                          borderRadius: BorderRadius.circular(20),
+                                        ),
+                                        child: Text(
+                                          _formatServiceType(
+                                            widget.schedule.serviceType,
+                                          ),
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                            color: PColors.primaryColor,
+                                          ),
+                                        ),
                                       ),
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: Text(
-                                      _formatServiceType(
-                                        widget.schedule.serviceType,
-                                      ),
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: PColors.primaryColor,
-                                      ),
-                                    ),
+                                      if (billingViewModel.isPaymentSet) ...[
+                                        SizedBox(width: 8),
+                                        Container(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                            vertical: 6,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: _getPaymentStatusColor(
+                                              billingViewModel.paymentStatus,
+                                            ).withOpacity(0.15),
+                                            borderRadius: BorderRadius.circular(20),
+                                          ),
+                                          child: Text(
+                                            _formatPaymentStatus(
+                                              billingViewModel.paymentStatus,
+                                            ),
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w600,
+                                              color: _getPaymentStatusColor(
+                                                billingViewModel.paymentStatus,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
                                   ),
                                 ],
                               ),
@@ -469,108 +501,12 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                               ),
                               SizedBox(height: 16),
 
-                              // Add Item Button
-                              SizedBox(
-                                width: double.infinity,
-                                child: OutlinedButton.icon(
-                                  onPressed: _showAddItemDialog,
-                                  icon: Icon(Icons.add_circle_outline),
-                                  label: Text('Add Item to Bill'),
-                                  style: OutlinedButton.styleFrom(
-                                    foregroundColor: PColors.primaryColor,
-                                    side: BorderSide(
-                                      color: PColors.primaryColor,
-                                      width: 1.5,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    padding: EdgeInsets.symmetric(vertical: 14),
-                                  ),
-                                ),
-                              ),
-
-                              SizedBox(height: 16),
-                              Divider(color: PColors.lightGray),
-                              SizedBox(height: 12),
-
-                              // Items List (only items with quantity > 0)
-                              ...billingViewModel.billingItems
-                                  .asMap()
-                                  .entries
-                                  .where((entry) => entry.value.quantity > 0)
-                                  .map((entry) {
-                                    int index = entry.key;
-                                    BillingItem item = entry.value;
-                                    return _buildBillingItemRow(item, index);
-                                  })
-                                  .toList(),
-
-                              if (billingViewModel.addedItems.isEmpty)
-                                Center(
-                                  child: Padding(
-                                    padding: EdgeInsets.symmetric(vertical: 20),
-                                    child: Column(
-                                      children: [
-                                        Icon(
-                                          Icons.shopping_cart_outlined,
-                                          size: 48,
-                                          color: PColors.darkGray.withOpacity(
-                                            0.3,
-                                          ),
-                                        ),
-                                        SizedBox(height: 12),
-                                        Text(
-                                          'No items added yet',
-                                          style: TextStyle(
-                                            color: PColors.darkGray.withOpacity(
-                                              0.6,
-                                            ),
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                        SizedBox(height: 4),
-                                        Text(
-                                          'Tap "Add Item to Bill" to get started',
-                                          style: TextStyle(
-                                            color: PColors.darkGray.withOpacity(
-                                              0.4,
-                                            ),
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-
-                              SizedBox(height: 16),
-                              Divider(color: PColors.lightGray, thickness: 2),
-                              SizedBox(height: 12),
-
-                              // Total Section
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Total Amount',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w700,
-                                      color: PColors.primaryColor,
-                                    ),
-                                  ),
-                                  Text(
-                                    '₹${billingViewModel.totalAmount.toStringAsFixed(2)}',
-                                    style: TextStyle(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.w800,
-                                      color: PColors.primaryColor,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                              // Show Firebase billing data if payment is set
+                              if (billingViewModel.isPaymentSet &&
+                                  billingViewModel.currentBilling != null)
+                                _buildFirebaseBillingSection(billingViewModel)
+                              else
+                                _buildEditableBillingSection(billingViewModel),
                             ],
                           ),
                         ),
@@ -986,6 +922,321 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  String _formatPaymentStatus(String status) {
+    switch (status.toLowerCase()) {
+      case 'pay_request':
+        return 'Payment Request';
+      case 'paid':
+        return 'Paid';
+      case 'cancelled':
+        return 'Cancelled';
+      case 'pending':
+        return 'Pending';
+      default:
+        return status;
+    }
+  }
+
+  Color _getPaymentStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'pay_request':
+        return Colors.orange;
+      case 'paid':
+        return PColors.successGreen;
+      case 'cancelled':
+        return PColors.errorRed;
+      case 'pending':
+        return PColors.darkGray;
+      default:
+        return PColors.primaryColor;
+    }
+  }
+
+  Widget _buildFirebaseBillingSection(OrderDetailViewModel billingViewModel) {
+    final billing = billingViewModel.currentBilling!;
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Divider(color: PColors.lightGray),
+        SizedBox(height: 12),
+
+        // Items List from Firebase
+        if (billing.items.isEmpty)
+          Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 20),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.shopping_cart_outlined,
+                    size: 48,
+                    color: PColors.darkGray.withOpacity(0.3),
+                  ),
+                  SizedBox(height: 12),
+                  Text(
+                    'No items in billing',
+                    style: TextStyle(
+                      color: PColors.darkGray.withOpacity(0.6),
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+        else
+          ...billing.items.map((item) => _buildFirebaseBillingItemRow(item)),
+
+        SizedBox(height: 16),
+        Divider(color: PColors.lightGray, thickness: 2),
+        SizedBox(height: 12),
+
+        // Total Section from Firebase
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Total Amount',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: PColors.primaryColor,
+              ),
+            ),
+            Text(
+              '₹${billing.totalAmount.toStringAsFixed(2)}',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: PColors.primaryColor,
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 8),
+        // Billing date info
+        Text(
+          'Billing created: ${DateFormat('dd MMM yyyy, hh:mm a').format(billing.createdAt)}',
+          style: TextStyle(
+            fontSize: 11,
+            color: PColors.darkGray.withOpacity(0.6),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFirebaseBillingItemRow(BillingItemData item) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: PColors.primaryColor.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: PColors.primaryColor.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.itemName,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: PColors.primaryColor,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      '₹${item.unitPrice.toStringAsFixed(2)} per item',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: PColors.darkGray.withOpacity(0.6),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Quantity display (read-only)
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: PColors.primaryColor.withOpacity(0.3),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.shopping_bag,
+                      size: 16,
+                      color: PColors.primaryColor,
+                    ),
+                    SizedBox(width: 6),
+                    Text(
+                      'Qty: ${item.quantity}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: PColors.primaryColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Subtotal
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'Subtotal',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: PColors.darkGray.withOpacity(0.6),
+                    ),
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    '₹${item.itemTotal.toStringAsFixed(2)}',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: PColors.primaryColor,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEditableBillingSection(OrderDetailViewModel billingViewModel) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Add Item Button
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: _showAddItemDialog,
+            icon: Icon(Icons.add_circle_outline),
+            label: Text('Add Item to Bill'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: PColors.primaryColor,
+              side: BorderSide(
+                color: PColors.primaryColor,
+                width: 1.5,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: EdgeInsets.symmetric(vertical: 14),
+            ),
+          ),
+        ),
+
+        SizedBox(height: 16),
+        Divider(color: PColors.lightGray),
+        SizedBox(height: 12),
+
+        // Items List (only items with quantity > 0)
+        ...billingViewModel.billingItems
+            .asMap()
+            .entries
+            .where((entry) => entry.value.quantity > 0)
+            .map((entry) {
+              int index = entry.key;
+              BillingItem item = entry.value;
+              return _buildBillingItemRow(item, index);
+            })
+            .toList(),
+
+        if (billingViewModel.addedItems.isEmpty)
+          Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 20),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.shopping_cart_outlined,
+                    size: 48,
+                    color: PColors.darkGray.withOpacity(0.3),
+                  ),
+                  SizedBox(height: 12),
+                  Text(
+                    'No items added yet',
+                    style: TextStyle(
+                      color: PColors.darkGray.withOpacity(0.6),
+                      fontSize: 14,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Tap "Add Item to Bill" to get started',
+                    style: TextStyle(
+                      color: PColors.darkGray.withOpacity(0.4),
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+        SizedBox(height: 16),
+        Divider(color: PColors.lightGray, thickness: 2),
+        SizedBox(height: 12),
+
+        // Total Section
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Total Amount',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: PColors.primaryColor,
+              ),
+            ),
+            Text(
+              '₹${billingViewModel.totalAmount.toStringAsFixed(2)}',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: PColors.primaryColor,
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
