@@ -168,7 +168,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-              billingViewModel.errorMessage ?? 'Failed to save payment'),
+            billingViewModel.errorMessage ?? 'Failed to save payment',
+          ),
           backgroundColor: PColors.errorRed,
         ),
       );
@@ -178,7 +179,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   Future<void> _updateStatus(String newStatus) async {
     final orderViewModel = context.read<ShopkeeperOrderViewModel>();
     final billingViewModel = context.read<OrderDetailViewModel>();
-    
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -211,7 +212,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
     Navigator.pop(context); // Close loading dialog
     Navigator.pop(context); // Go back to list
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Status updated successfully'),
@@ -238,109 +239,109 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           : Consumer<OrderDetailViewModel>(
               builder: (context, billingViewModel, child) {
                 return SingleChildScrollView(
-              child: Column(
-                children: [
-                  // Order Details Section
-                  Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          PColors.primaryColor,
-                          PColors.secondoryColor,
-                        ],
-                      ),
-                    ),
-                    padding: EdgeInsets.all(24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Order Information',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
+                  child: Column(
+                    children: [
+                      // Order Details Section
+                      Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              PColors.primaryColor,
+                              PColors.secondoryColor,
+                            ],
                           ),
                         ),
-                        SizedBox(height: 16),
-                        _buildInfoRow(
-                          'Schedule ID',
-                          widget.schedule.scheduleId,
-                          Icons.tag,
-                        ),
-                        _buildInfoRow(
-                          'Status',
-                          widget.schedule.status.toUpperCase(),
-                          Icons.info_outline,
-                        ),
-                        _buildInfoRow(
-                          'Service Type',
-                          _formatServiceType(widget.schedule.serviceType),
-                          Icons.star_outline,
-                        ),
-                        _buildInfoRow(
-                          'Wash Type',
-                          _formatWashType(widget.schedule.washType),
-                          Icons.local_laundry_service,
-                        ),
-                        _buildInfoRow(
-                          'Pickup Date',
-                              DateFormat(
-                                'dd MMM yyyy',
-                              ).format(widget.schedule.pickupDate),
-                          Icons.calendar_today,
-                        ),
-                        _buildInfoRow(
-                          'Time Slot',
-                          widget.schedule.timeSlot,
-                          Icons.access_time,
-                        ),
-                        _buildInfoRow(
-                          'Pickup Location',
-                          widget.schedule.pickupLocation,
-                          Icons.location_on,
-                          isAddress: true,
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  SizedBox(height: 16),
-
-                  // Customer Details Section
-                  if (customer != null) ...[
-                    Padding(
-                      padding: EdgeInsets.all(20),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: PColors.lightGray,
-                                width: 1.5,
-                              ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: PColors.primaryColor.withOpacity(0.08),
-                              blurRadius: 10,
-                              offset: Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        padding: EdgeInsets.all(20),
+                        padding: EdgeInsets.all(24),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Customer Details',
+                              'Order Information',
                               style: TextStyle(
-                                fontSize: 18,
+                                fontSize: 20,
                                 fontWeight: FontWeight.w700,
-                                color: PColors.primaryColor,
+                                color: Colors.white,
                               ),
                             ),
                             SizedBox(height: 16),
+                            _buildInfoRow(
+                              'Schedule ID',
+                              widget.schedule.scheduleId,
+                              Icons.tag,
+                            ),
+                            _buildInfoRow(
+                              'Status',
+                              widget.schedule.status.toUpperCase(),
+                              Icons.info_outline,
+                            ),
+                            _buildInfoRow(
+                              'Service Type',
+                              _formatServiceType(widget.schedule.serviceType),
+                              Icons.star_outline,
+                            ),
+                            _buildInfoRow(
+                              'Wash Type',
+                              _formatWashType(widget.schedule.washType),
+                              Icons.local_laundry_service,
+                            ),
+                            _buildInfoRow(
+                              'Pickup Date',
+                              DateFormat(
+                                'dd MMM yyyy',
+                              ).format(widget.schedule.pickupDate),
+                              Icons.calendar_today,
+                            ),
+                            _buildInfoRow(
+                              'Time Slot',
+                              widget.schedule.timeSlot,
+                              Icons.access_time,
+                            ),
+                            _buildInfoRow(
+                              'Pickup Location',
+                              widget.schedule.pickupLocation,
+                              Icons.location_on,
+                              isAddress: true,
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      SizedBox(height: 16),
+
+                      // Customer Details Section
+                      if (customer != null) ...[
+                        Padding(
+                          padding: EdgeInsets.all(20),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: PColors.lightGray,
+                                width: 1.5,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: PColors.primaryColor.withOpacity(0.08),
+                                  blurRadius: 10,
+                                  offset: Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            padding: EdgeInsets.all(20),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Customer Details',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700,
+                                    color: PColors.primaryColor,
+                                  ),
+                                ),
+                                SizedBox(height: 16),
                                 _buildDetailRow(
                                   'Name',
                                   customer!.fullName ?? 'Not Applicable',
@@ -351,7 +352,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                   customer!.phoneNumber,
                                   Icons.phone,
                                 ),
-                                if (customer!.alternativePhone != null && customer!.alternativePhone!.isNotEmpty)
+                                if (customer!.alternativePhone != null &&
+                                    customer!.alternativePhone!.isNotEmpty)
                                   _buildDetailRow(
                                     'Alternative Phone',
                                     customer!.alternativePhone!,
@@ -362,7 +364,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                   customer!.email ?? 'Not Applicable',
                                   Icons.email,
                                 ),
-                                if (customer!.gender != null && customer!.gender!.isNotEmpty)
+                                if (customer!.gender != null &&
+                                    customer!.gender!.isNotEmpty)
                                   _buildDetailRow(
                                     'Gender',
                                     _formatGender(customer!.gender!),
@@ -371,10 +374,13 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                 if (customer!.dateOfBirth != null)
                                   _buildDetailRow(
                                     'Date of Birth',
-                                    DateFormat('dd MMM yyyy').format(customer!.dateOfBirth!),
+                                    DateFormat(
+                                      'dd MMM yyyy',
+                                    ).format(customer!.dateOfBirth!),
                                     Icons.cake,
                                   ),
-                                if (customer!.profession != null && customer!.profession!.isNotEmpty)
+                                if (customer!.profession != null &&
+                                    customer!.profession!.isNotEmpty)
                                   _buildDetailRow(
                                     'Profession',
                                     customer!.profession!,
@@ -385,21 +391,21 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                   customer!.location ?? 'Not Applicable',
                                   Icons.location_on,
                                 ),
-                          ],
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  ],
+                      ],
 
-                  SizedBox(height: 16),
+                      SizedBox(height: 16),
 
                       // Billing Section
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
                             border: Border.all(
                               color: PColors.lightGray,
                               width: 1.5,
@@ -590,20 +596,20 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                               color: PColors.lightGray,
                               width: 1.5,
                             ),
-                      ),
-                      padding: EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Update Order Status',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              color: PColors.primaryColor,
-                            ),
                           ),
-                          SizedBox(height: 16),
+                          padding: EdgeInsets.all(20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Update Order Status',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: PColors.primaryColor,
+                                ),
+                              ),
+                              SizedBox(height: 16),
                               _buildStatusButton(
                                 'Confirm Order',
                                 'confirmed',
@@ -639,14 +645,14 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                 'cancelled',
                                 PColors.errorRed,
                               ),
-                        ],
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
 
-                  SizedBox(height: 32),
-                ],
-              ),
+                      SizedBox(height: 32),
+                    ],
+                  ),
                 );
               },
             ),
@@ -736,7 +742,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   Widget _buildStatusButton(String label, String status, Color color) {
     final currentStatus = widget.schedule.status;
     final isCurrentStatus = currentStatus == status;
-    
+
     return Padding(
       padding: EdgeInsets.only(bottom: 12),
       child: SizedBox(
@@ -1017,7 +1023,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       buttonText = 'Order Paid ✓';
       gradientColors = [
         PColors.successGreen,
-        PColors.successGreen.withOpacity(0.7)
+        PColors.successGreen.withOpacity(0.7),
       ];
       isDisabled = true;
     }
@@ -1033,13 +1039,16 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           buttonText = 'Payment Completed ✓';
           gradientColors = [
             PColors.successGreen,
-            PColors.successGreen.withOpacity(0.7)
+            PColors.successGreen.withOpacity(0.7),
           ];
           isDisabled = true;
           break;
         case 'cancelled':
           buttonText = 'Payment Cancelled';
-          gradientColors = [PColors.errorRed, PColors.errorRed.withOpacity(0.7)];
+          gradientColors = [
+            PColors.errorRed,
+            PColors.errorRed.withOpacity(0.7),
+          ];
           isDisabled = true;
           break;
         default:
@@ -1054,8 +1063,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     return CustomElavatedTextButton(
       text: buttonText,
       onPressed: billingViewModel.isSaving ? null : onPressed,
-      gradientColors:
-          isDisabled ? [PColors.lightGray, PColors.lightGray] : gradientColors,
+      gradientColors: isDisabled
+          ? [PColors.lightGray, PColors.lightGray]
+          : gradientColors,
       icon: billingViewModel.isSaving
           ? SizedBox(
               width: 20,
@@ -1066,12 +1076,12 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
               ),
             )
           : (orderStatus == 'paid' || paymentStatus == 'paid')
-              ? Icon(Icons.check_circle, color: Colors.white, size: 20)
-              : paymentStatus == 'pay_request'
-                  ? Icon(Icons.pending, color: Colors.white, size: 20)
-                  : orderStatus == 'cancelled'
-                      ? Icon(Icons.block, color: Colors.white, size: 20)
-                      : Icon(Icons.payment, color: Colors.white, size: 20),
+          ? Icon(Icons.check_circle, color: Colors.white, size: 20)
+          : paymentStatus == 'pay_request'
+          ? Icon(Icons.pending, color: Colors.white, size: 20)
+          : orderStatus == 'cancelled'
+          ? Icon(Icons.block, color: Colors.white, size: 20)
+          : Icon(Icons.payment, color: Colors.white, size: 20),
     );
   }
 }
