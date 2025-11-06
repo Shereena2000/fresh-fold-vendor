@@ -21,26 +21,40 @@ final double contentHPadding;
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 600;
+    
     return DefaultTabController(
       length: tabTitles.length,
       child: Column(
         children: [
-          ButtonsTabBar(
-            backgroundColor: PColors.primaryColor,
-            unselectedBackgroundColor: Colors.white,
-            unselectedLabelStyle: getTextStyle(
-              color: PColors.darkGray,
-              fontSize:fontSize?? 14,
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: ButtonsTabBar(
+              backgroundColor: PColors.primaryColor,
+              unselectedBackgroundColor: Colors.white,
+              unselectedLabelStyle: getTextStyle(
+                color: PColors.darkGray,
+                fontSize: fontSize ?? 14,
+              ),
+              labelStyle: getTextStyle(
+                color: Colors.white,
+                fontSize: fontSize ?? 14,
+              ),
+              borderWidth: 1.5,
+              borderColor: PColors.primaryColor,
+              radius: 30,
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: contentHPadding,
+                vertical: isMobile ? 8 : 10,
+              ),
+              tabs: tabTitles.map((title) => Tab(text: title)).toList(),
             ),
-            labelStyle: getTextStyle(color: Colors.white, fontSize:fontSize?? 14),
-            borderWidth: 1.5,
-            borderColor: PColors.primaryColor,
-            radius: 30,
-
-            contentPadding:   EdgeInsets.symmetric(horizontal: contentHPadding),
-            tabs: tabTitles.map((title) => Tab(text: title)).toList(),
           ),
-          Expanded(child: TabBarView(children: tabContents),),
+          SizedBox(height: 12),
+          Expanded(
+            child: TabBarView(children: tabContents),
+          ),
         ],
       ),
     );

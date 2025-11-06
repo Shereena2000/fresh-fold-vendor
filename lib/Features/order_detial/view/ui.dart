@@ -224,6 +224,11 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isWeb = screenWidth > 900;
+    final isTablet = screenWidth > 600 && screenWidth <= 900;
+    final horizontalPadding = isWeb ? 32.0 : (isTablet ? 24.0 : 20.0);
+    
     return Scaffold(
       backgroundColor: PColors.scaffoldColor,
       appBar: AppBar(
@@ -239,9 +244,14 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           ? Center(child: CircularProgressIndicator())
           : Consumer<OrderDetailViewModel>(
               builder: (context, billingViewModel, child) {
-                return SingleChildScrollView(
-                  child: Column(
-                    children: [
+                return Center(
+                  child: Container(
+                    constraints: BoxConstraints(
+                      maxWidth: isWeb ? 1200 : double.infinity,
+                    ),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
                       // Order Details Section
                       Container(
                         width: double.infinity,
@@ -313,7 +323,10 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       // Customer Details Section
                       if (customer != null) ...[
                         Padding(
-                          padding: EdgeInsets.all(20),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: horizontalPadding,
+                            vertical: 16,
+                          ),
                           child: Container(
                             decoration: BoxDecoration(
                               color: Colors.white,
@@ -402,7 +415,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
                       // Billing Section
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: horizontalPadding,
+                        ),
                         child: Container(
                           decoration: BoxDecoration(
                             color: Colors.white,
@@ -516,14 +531,18 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
                       // Payment Button - Works for THIS specific order only
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: horizontalPadding,
+                        ),
                         child: _buildPaymentButton(billingViewModel),
                       ),
 
                       SizeBoxH(16),
-                      // Status USpdate Section
+                      // Status Update Section
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: horizontalPadding,
+                        ),
                         child: Container(
                           decoration: BoxDecoration(
                             color: Colors.white,
@@ -546,48 +565,16 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                 ),
                               ),
                               SizedBox(height: 16),
-                              _buildStatusButton(
-                                'Confirm Order',
-                                'confirmed',
-                                Colors.blue,
-                              ),
-                              _buildStatusButton(
-                                'Mark as Picked Up',
-                                'picked_up',
-                                Colors.orange,
-                              ),
-                              _buildStatusButton(
-                                'Start Processing',
-                                'processing',
-                                Colors.purple,
-                              ),
-                              _buildStatusButton(
-                                'Ready to Deliver',
-                                'ready',
-                                Colors.teal,
-                              ),
-                              _buildStatusButton(
-                                'Mark as Delivered',
-                                'delivered',
-                                Colors.indigo,
-                              ),
-                              _buildStatusButton(
-                                'Mark as Paid',
-                                'paid',
-                                PColors.successGreen,
-                              ),
-                              _buildStatusButton(
-                                'Cancel Order',
-                                'cancelled',
-                                PColors.errorRed,
-                              ),
+                              _buildResponsiveStatusButtons(isWeb, isTablet),
                             ],
                           ),
                         ),
                       ),
 
-                      SizedBox(height: 32),
-                    ],
+                          SizedBox(height: 32),
+                        ],
+                      ),
+                    ),
                   ),
                 );
               },
@@ -675,15 +662,62 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     );
   }
 
+  Widget _buildResponsiveStatusButtons(bool isWeb, bool isTablet) {
+    final statusButtons = [
+      {'label': 'Confirm Order', 'status': 'confirmed', 'color': Colors.blue},
+      {'label': 'Mark as Picked Up', 'status': 'picked_up', 'color': Colors.orange},
+      {'label': 'Start Processing', 'status': 'processing', 'color': Colors.purple},
+      {'label': 'Ready to Deliver', 'status': 'ready', 'color': Colors.teal},
+      {'label': 'Mark as Delivered', 'status': 'delivered', 'color': Colors.indigo},
+      {'label': 'Mark as Paid', 'status': 'paid', 'color': PColors.successGreen},
+      {'label': 'Cancel Order', 'status': 'cancelled', 'color': PColors.errorRed},
+    ];
+
+    if (isWeb || isTablet) {
+      // Grid layout for web and tablet
+      return GridView.builder(
+        shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: isWeb ? 2 : 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: isWeb ? 4 : 3.5,
+        ),
+        itemCount: statusButtons.length,
+        itemBuilder: (context, index) {
+          final button = statusButtons[index];
+          return _buildStatusButton(
+            button['label'] as String,
+            button['status'] as String,
+            button['color'] as Color,
+          );
+        },
+      );
+    } else {
+      // Column layout for mobile
+      return Column(
+        children: statusButtons.map((button) {
+          return Padding(
+            padding: EdgeInsets.only(bottom: 12),
+            child: _buildStatusButton(
+              button['label'] as String,
+              button['status'] as String,
+              button['color'] as Color,
+            ),
+          );
+        }).toList(),
+      );
+    }
+  }
+
   Widget _buildStatusButton(String label, String status, Color color) {
     final currentStatus = widget.schedule.status;
     final isCurrentStatus = currentStatus == status;
 
-    return Padding(
-      padding: EdgeInsets.only(bottom: 12),
-      child: SizedBox(
-        width: double.infinity,
-        child: ElevatedButton(
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
           onPressed: isCurrentStatus
               ? null
               : () => _showConfirmDialog(label, status),
@@ -715,7 +749,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             ],
           ),
         ),
-      ),
     );
   }
 

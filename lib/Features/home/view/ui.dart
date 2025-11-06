@@ -30,6 +30,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isWeb = screenWidth > 900;
+    final isTablet = screenWidth > 600 && screenWidth <= 900;
+    
     return Scaffold(
       backgroundColor: PColors.scaffoldColor,
       appBar: AppBar(
@@ -73,130 +77,64 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             child: SingleChildScrollView(
               physics: AlwaysScrollableScrollPhysics(),
-              child: Padding(
-                padding: EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Welcome Section
-                    _buildWelcomeCard(),
+              child: Center(
+                child: Container(
+                  constraints: BoxConstraints(
+                    maxWidth: isWeb ? 1400 : double.infinity,
+                  ),
+                  padding: EdgeInsets.all(isWeb ? 32 : 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Welcome Section
+                      _buildWelcomeCard(),
 
-                    SizedBox(height: 24),
+                      SizedBox(height: 24),
 
-                    // Quick Stats Header
-                    Text(
-                      'Order Statistics',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: PColors.primaryColor,
-                      ),
-                    ),
-
-                    SizedBox(height: 16),
-
-                    // Active Orders Grid
-                    _buildStatCard(
-                      'Pickup Requests',
-                      viewModel.pickupRequests.length.toString(),
-                      Icons.pending_actions,
-                      Colors.orange,
-                      Colors.orange.withOpacity(0.1),
-                    ),
-
-                    SizedBox(height: 12),
-
-                    _buildStatCard(
-                      'Confirmed Orders',
-                      viewModel.confirmed.length.toString(),
-                      Icons.check_circle_outline,
-                      Colors.blue,
-                      Colors.blue.withOpacity(0.1),
-                    ),
-
-                    SizedBox(height: 12),
-
-                    _buildStatCard(
-                      'Picked Up',
-                      viewModel.pickedUp.length.toString(),
-                      Icons.local_shipping_outlined,
-                      Colors.purple,
-                      Colors.purple.withOpacity(0.1),
-                    ),
-
-                    SizedBox(height: 12),
-
-                    _buildStatCard(
-                      'Processing',
-                      viewModel.processing.length.toString(),
-                      Icons.settings,
-                      Colors.indigo,
-                      Colors.indigo.withOpacity(0.1),
-                    ),
-
-                    SizedBox(height: 12),
-
-                    _buildStatCard(
-                      'Ready to Deliver',
-                      viewModel.readyToDeliver.length.toString(),
-                      Icons.inventory_2_outlined,
-                      Colors.teal,
-                      Colors.teal.withOpacity(0.1),
-                    ),
-
-                    SizedBox(height: 12),
-
-                    _buildStatCard(
-                      'Delivered',
-                      viewModel.delivered.length.toString(),
-                      Icons.done_all,
-                      Colors.green,
-                      Colors.green.withOpacity(0.1),
-                    ),
-
-                    SizedBox(height: 24),
-
-                    // Completed Section
-                    Text(
-                      'Completed & Cancelled',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: PColors.primaryColor,
-                      ),
-                    ),
-
-                    SizedBox(height: 16),
-
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildMiniStatCard(
-                            'Paid',
-                            viewModel.paid.length.toString(),
-                            Icons.payment,
-                            PColors.successGreen,
-                          ),
+                      // Quick Stats Header
+                      Text(
+                        'Order Statistics',
+                        style: TextStyle(
+                          fontSize: isWeb ? 24 : 20,
+                          fontWeight: FontWeight.w700,
+                          color: PColors.primaryColor,
                         ),
-                        SizedBox(width: 12),
-                        Expanded(
-                          child: _buildMiniStatCard(
-                            'Cancelled',
-                            viewModel.cancelled.length.toString(),
-                            Icons.cancel,
-                            PColors.errorRed,
-                          ),
+                      ),
+
+                      SizedBox(height: 16),
+
+                      // Active Orders Grid - Responsive
+                      _buildResponsiveStatCards(
+                        viewModel,
+                        isWeb,
+                        isTablet,
+                      ),
+
+                      SizedBox(height: 24),
+
+                      // Completed Section
+                      Text(
+                        'Completed & Cancelled',
+                        style: TextStyle(
+                          fontSize: isWeb ? 24 : 20,
+                          fontWeight: FontWeight.w700,
+                          color: PColors.primaryColor,
                         ),
-                      ],
-                    ),
+                      ),
 
-                    SizedBox(height: 24),
+                      SizedBox(height: 16),
 
-                    // Total Orders Summary
-                    _buildTotalSummaryCard(viewModel),
+                      // Completed cards grid
+                      _buildCompletedCardsGrid(viewModel, isWeb, isTablet),
 
-                    SizedBox(height: 20),
-                  ],
+                      SizedBox(height: 24),
+
+                      // Total Orders Summary
+                      _buildTotalSummaryCard(viewModel),
+
+                      SizedBox(height: 20),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -204,6 +142,148 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       ),
     );
+  }
+
+  Widget _buildResponsiveStatCards(
+    ShopkeeperOrderViewModel viewModel,
+    bool isWeb,
+    bool isTablet,
+  ) {
+    final crossAxisCount = isWeb ? 3 : (isTablet ? 2 : 1);
+    
+    final statCards = [
+      {
+        'title': 'Pickup Requests',
+        'count': viewModel.pickupRequests.length.toString(),
+        'icon': Icons.pending_actions,
+        'color': Colors.orange,
+      },
+      {
+        'title': 'Confirmed Orders',
+        'count': viewModel.confirmed.length.toString(),
+        'icon': Icons.check_circle_outline,
+        'color': Colors.blue,
+      },
+      {
+        'title': 'Picked Up',
+        'count': viewModel.pickedUp.length.toString(),
+        'icon': Icons.local_shipping_outlined,
+        'color': Colors.purple,
+      },
+      {
+        'title': 'Processing',
+        'count': viewModel.processing.length.toString(),
+        'icon': Icons.settings,
+        'color': Colors.indigo,
+      },
+      {
+        'title': 'Ready to Deliver',
+        'count': viewModel.readyToDeliver.length.toString(),
+        'icon': Icons.inventory_2_outlined,
+        'color': Colors.teal,
+      },
+      {
+        'title': 'Delivered',
+        'count': viewModel.delivered.length.toString(),
+        'icon': Icons.done_all,
+        'color': Colors.green,
+      },
+    ];
+
+    if (isWeb || isTablet) {
+      // Grid layout for web and tablet
+      return GridView.builder(
+        shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: crossAxisCount,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          childAspectRatio: isWeb ? 2.5 : 2,
+        ),
+        itemCount: statCards.length,
+        itemBuilder: (context, index) {
+          final card = statCards[index];
+          return _buildStatCard(
+            card['title'] as String,
+            card['count'] as String,
+            card['icon'] as IconData,
+            card['color'] as Color,
+            (card['color'] as Color).withOpacity(0.1),
+          );
+        },
+      );
+    } else {
+      // Column layout for mobile
+      return Column(
+        children: statCards.map((card) {
+          return Padding(
+            padding: EdgeInsets.only(bottom: 12),
+            child: _buildStatCard(
+              card['title'] as String,
+              card['count'] as String,
+              card['icon'] as IconData,
+              card['color'] as Color,
+              (card['color'] as Color).withOpacity(0.1),
+            ),
+          );
+        }).toList(),
+      );
+    }
+  }
+
+  Widget _buildCompletedCardsGrid(
+    ShopkeeperOrderViewModel viewModel,
+    bool isWeb,
+    bool isTablet,
+  ) {
+    if (isWeb || isTablet) {
+      final crossAxisCount = isWeb ? 4 : 2;
+      return GridView.count(
+        shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
+        crossAxisCount: crossAxisCount,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+        childAspectRatio: isWeb ? 1.2 : 1,
+        children: [
+          _buildMiniStatCard(
+            'Paid',
+            viewModel.paid.length.toString(),
+            Icons.payment,
+            PColors.successGreen,
+          ),
+          _buildMiniStatCard(
+            'Cancelled',
+            viewModel.cancelled.length.toString(),
+            Icons.cancel,
+            PColors.errorRed,
+          ),
+        ],
+      );
+    } else {
+      return Row(
+        children: [
+          Expanded(
+            child: _buildMiniStatCard(
+              'Paid',
+              viewModel.paid.length.toString(),
+              Icons.payment,
+              PColors.successGreen,
+            ),
+          ),
+          SizedBox(width: 12),
+          Expanded(
+            child: _buildMiniStatCard(
+              'Cancelled',
+              viewModel.cancelled.length.toString(),
+              Icons.cancel,
+              PColors.errorRed,
+            ),
+          ),
+        ],
+      );
+    }
   }
 
   Widget _buildWelcomeCard() {

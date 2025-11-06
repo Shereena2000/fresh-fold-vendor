@@ -8,23 +8,55 @@ class PrivacyPolicyScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isWeb = screenWidth > 900;
+    final isTablet = screenWidth > 600 && screenWidth <= 900;
+    final horizontalPadding = isWeb ? 48.0 : (isTablet ? 32.0 : 16.0);
+    
     return Scaffold(
+      backgroundColor: PColors.scaffoldColor,
       appBar: CustomAppBar(title: 'Privacy Policy'),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(),
-            const SizedBox(height: 20),
-            _buildPrivacyPolicyContent(),
-          ],
+      body: Center(
+        child: Container(
+          constraints: BoxConstraints(
+            maxWidth: isWeb ? 900 : double.infinity,
+          ),
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(
+              horizontal: horizontalPadding,
+              vertical: isWeb ? 32.0 : 16.0,
+            ),
+            child: Container(
+              padding: EdgeInsets.all(isWeb ? 40 : (isTablet ? 24 : 16)),
+              decoration: isWeb || isTablet
+                  ? BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
+                    )
+                  : null,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(isWeb),
+                  SizedBox(height: isWeb ? 32 : 20),
+                  _buildPrivacyPolicyContent(),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(bool isWeb) {
     return SizedBox(
       width: double.infinity,
       child: Column(
@@ -33,7 +65,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
           Text(
             'PRIVACY POLICY FOR FRESH FOLD VENDOR',
             style: TextStyle(
-              fontSize: 18,
+              fontSize: isWeb ? 24 : 18,
               fontWeight: FontWeight.bold,
               color: PColors.primaryColor,
             ),
@@ -42,7 +74,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
           Text(
             'Last Updated: October 2025',
             style: TextStyle(
-              fontSize: 14,
+              fontSize: isWeb ? 16 : 14,
               fontWeight: FontWeight.w500,
               color: PColors.secondoryColor,
             ),

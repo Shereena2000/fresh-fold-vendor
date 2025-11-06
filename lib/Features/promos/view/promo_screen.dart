@@ -192,6 +192,11 @@ class _PromoManagementScreenState extends State<PromoManagementScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isWeb = screenWidth > 900;
+    final isTablet = screenWidth > 600 && screenWidth <= 900;
+    final horizontalPadding = isWeb ? 32.0 : (isTablet ? 24.0 : 16.0);
+    
     return Scaffold(
       backgroundColor: PColors.scaffoldColor,
       appBar: AppBar(
@@ -214,95 +219,123 @@ class _PromoManagementScreenState extends State<PromoManagementScreen> {
             );
           }
 
-          return Column(
-            children: [
-              // Upload Button
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(20),
-                color: Colors.white,
-                child: ElevatedButton.icon(
-                  onPressed: promoViewModel.isUploading
-                      ? null
-                      : _showImageSourceDialog,
-                  icon: promoViewModel.isUploading
-                      ? SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+          return Center(
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: isWeb ? 1400 : double.infinity,
+              ),
+              child: Column(
+                children: [
+                  // Upload Button
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: horizontalPadding,
+                      vertical: 20,
+                    ),
+                    color: Colors.white,
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: isWeb ? 500 : double.infinity,
+                        ),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            onPressed: promoViewModel.isUploading
+                                ? null
+                                : _showImageSourceDialog,
+                            icon: promoViewModel.isUploading
+                                ? SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                    ),
+                                  )
+                                : Icon(Icons.add_photo_alternate),
+                            label: Text(
+                              promoViewModel.isUploading ? 'Uploading...' : 'Upload Promo Image',
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: PColors.primaryColor,
+                              foregroundColor: Colors.white,
+                              padding: EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
                           ),
-                        )
-                      : Icon(Icons.add_photo_alternate),
-                  label: Text(
-                    promoViewModel.isUploading ? 'Uploading...' : 'Upload Promo Image',
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: PColors.primaryColor,
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
 
-              // Promos Grid
-              Expanded(
-                child: promoViewModel.promos.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.image_not_supported,
-                              size: 80,
-                              color: PColors.lightGray,
+                  // Promos Grid
+                  Expanded(
+                    child: promoViewModel.promos.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.image_not_supported,
+                                  size: 80,
+                                  color: PColors.lightGray,
+                                ),
+                                SizedBox(height: 16),
+                                Text(
+                                  'No promos yet',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: PColors.darkGray,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  'Upload promo images for customers',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: PColors.darkGray.withOpacity(0.6),
+                                  ),
+                                ),
+                              ],
                             ),
-                            SizedBox(height: 16),
-                            Text(
-                              'No promos yet',
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: PColors.darkGray,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              'Upload promo images for customers',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: PColors.darkGray.withOpacity(0.6),
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : StreamBuilder<List<PromoModel>>(
-                        stream: promoViewModel.streamPromos(),
-                        builder: (context, snapshot) {
-                          final promos = snapshot.data ?? promoViewModel.promos;
+                          )
+                        : StreamBuilder<List<PromoModel>>(
+                            stream: promoViewModel.streamPromos(),
+                            builder: (context, snapshot) {
+                              final promos = snapshot.data ?? promoViewModel.promos;
+                              
+                              // Determine grid columns based on screen size
+                              int crossAxisCount = 2;
+                              if (isWeb) {
+                                crossAxisCount = 4;
+                              } else if (isTablet) {
+                                crossAxisCount = 3;
+                              }
 
-                          return GridView.builder(
-                            padding: EdgeInsets.all(16),
-                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 12,
-                              mainAxisSpacing: 12,
-                              childAspectRatio: 1,
-                            ),
-                            itemCount: promos.length,
-                            itemBuilder: (context, index) {
-                              return _buildPromoCard(promos[index]);
+                              return GridView.builder(
+                                padding: EdgeInsets.all(horizontalPadding),
+                                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: crossAxisCount,
+                                  crossAxisSpacing: isWeb ? 16 : 12,
+                                  mainAxisSpacing: isWeb ? 16 : 12,
+                                  childAspectRatio: 1,
+                                ),
+                                itemCount: promos.length,
+                                itemBuilder: (context, index) {
+                                  return _buildPromoCard(promos[index]);
+                                },
+                              );
                             },
-                          );
-                        },
-                      ),
+                          ),
+                  ),
+                ],
               ),
-            ],
+            ),
           );
         },
       ),

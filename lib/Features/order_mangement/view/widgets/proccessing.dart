@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../Settings/utils/p_colors.dart';
-import '../../../../Settings/utils/p_pages.dart';
-import '../../model/client_model.dart';
 import '../../view_model/order_view_model.dart';
-import 'order_card.dart';
+import 'responsive_order_list.dart';
 
 class Processing extends StatelessWidget {
   const Processing({super.key});
@@ -22,28 +20,9 @@ class Processing extends StatelessWidget {
           return _buildEmptyState('No processing orders', Icons.hourglass_empty);
         }
 
-        return ListView.builder(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          itemCount: viewModel.processing.length,
-          itemBuilder: (context, index) {
-            final schedule = viewModel.processing[index];
-            return FutureBuilder<UserModel?>(
-              future: viewModel.getUserDetails(schedule.userId),
-              builder: (context, snapshot) {
-                String customerName = snapshot.hasData && snapshot.data != null
-                    ? snapshot.data!.fullName ?? 'Unknown'
-                    : 'Loading...';
-
-                return ShopkeeperOrderCard(
-                  schedule: schedule,
-                  customerName: customerName,
-                  onModify: () {
-                    Navigator.pushNamed(context, PPages.orderDetailPageUi, arguments: schedule);
-                  },
-                );
-              },
-            );
-          },
+        return ResponsiveOrderList(
+          orders: viewModel.processing,
+          viewModel: viewModel,
         );
       },
     );

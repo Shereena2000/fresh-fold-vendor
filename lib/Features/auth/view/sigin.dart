@@ -14,28 +14,72 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isWeb = screenWidth > 600;
+    
     return Scaffold(
+      backgroundColor: isWeb ? PColors.scaffoldColor : Colors.white,
       body: SafeArea(
-        child: SingleChildScrollView(
-          // Wrap with SingleChildScrollView
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: MediaQuery.of(context).size.height,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  HeadingSection(title: "Welcome Back !"),
+        child: Center(
+          child: SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: MediaQuery.of(context).size.height - 
+                    MediaQuery.of(context).padding.top - 
+                    MediaQuery.of(context).padding.bottom,
+              ),
+              child: Center(
+                child: Container(
+                  width: isWeb ? 500 : double.infinity,
+                  margin: EdgeInsets.symmetric(
+                    horizontal: isWeb ? 24 : 0,
+                    vertical: isWeb ? 40 : 0,
+                  ),
+                  padding: EdgeInsets.all(isWeb ? 48 : 24),
+                  decoration: isWeb
+                      ? BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 20,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
+                        )
+                      : null,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Logo or App Name for web
+                      if (isWeb) ...[
+                        Icon(
+                          Icons.local_laundry_service_rounded,
+                          size: 64,
+                          color: PColors.primaryColor,
+                        ),
+                        SizeBoxH(16),
+                        Text(
+                          "FreshFold Shop Keeper",
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: PColors.primaryColor,
+                          ),
+                        ),
+                        SizeBoxH(8),
+                      ],
+                      
+                      HeadingSection(title: "Welcome Back !"),
+                      SizeBoxH(isWeb ? 32 : 20),
 
-                  SizeBoxH(20),
-
-                  Consumer<AuthViewModel>(
-                    builder: (context, provider, child) {
-                      return Column(
-                        children: [
+                      Consumer<AuthViewModel>(
+                        builder: (context, provider, child) {
+                          return Column(
+                            children: [
                           // Email Field
                           CustomTextFeild(
                             controller: provider.emailController,
@@ -157,11 +201,13 @@ class LoginScreen extends StatelessWidget {
                               ),
                             ),
                           ),
-                        ],
-                      );
-                    },
+                            ],
+                          );
+                        },
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),

@@ -79,6 +79,11 @@ class ShopkeeperPriceTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isWeb = screenWidth > 900;
+    final isTablet = screenWidth > 600 && screenWidth <= 900;
+    final horizontalPadding = isWeb ? 32.0 : (isTablet ? 24.0 : 16.0);
+    
     return Consumer<PriceViewModel>(
       builder: (context, priceProvider, child) {
         if (priceProvider.isLoading) {
@@ -102,34 +107,49 @@ class ShopkeeperPriceTable extends StatelessWidget {
 
             final items = snapshot.data ?? [];
 
-            return Column(
-              children: [
-                // Add Button
-                Container(
-                  padding: EdgeInsets.all(16),
-                  color: Colors.white,
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () => _showAddEditDialog(context, category, null),
-                      icon: Icon(Icons.add),
-                      label: Text('Add New Item'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF013E6A),
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+            return Center(
+              child: Container(
+                constraints: BoxConstraints(
+                  maxWidth: isWeb ? 1400 : double.infinity,
+                ),
+                child: Column(
+                  children: [
+                    // Add Button
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: horizontalPadding,
+                        vertical: 16,
+                      ),
+                      color: Colors.white,
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: isWeb ? 400 : double.infinity,
+                          ),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              onPressed: () => _showAddEditDialog(context, category, null),
+                              icon: Icon(Icons.add),
+                              label: Text('Add New Item'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Color(0xFF013E6A),
+                                foregroundColor: Colors.white,
+                                padding: EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ),
 
-                // Items Table
-                Expanded(
-                  child: items.isEmpty
-                      ? Center(
+                    // Items Table
+                    Expanded(
+                      child: items.isEmpty
+                          ? Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -158,14 +178,17 @@ class ShopkeeperPriceTable extends StatelessWidget {
                             ],
                           ),
                         )
-                      : SingleChildScrollView(
-                          child: Container(
-                            margin: EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.grey[300]!),
-                            ),
+                          : SingleChildScrollView(
+                              child: Container(
+                                margin: EdgeInsets.symmetric(
+                                  horizontal: horizontalPadding,
+                                  vertical: 16,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: Colors.grey[300]!),
+                                ),
                             child: Column(
                               children: [
                                 // Table Header
@@ -221,13 +244,15 @@ class ShopkeeperPriceTable extends StatelessWidget {
                                       isEven,
                                     );
                                   }).toList(),
+                                    ),
+                                  ],
                                 ),
-                              ],
+                              ),
                             ),
-                          ),
-                        ),
+                      ),
+                  ],
                 ),
-              ],
+              ),
             );
           },
         );

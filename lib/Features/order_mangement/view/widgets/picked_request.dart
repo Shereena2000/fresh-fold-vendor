@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:fresh_fold_shop_keeper/Settings/utils/p_pages.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../Settings/utils/p_colors.dart';
-import '../../model/client_model.dart';
 import '../../view_model/order_view_model.dart';
-import 'order_card.dart';
+import 'responsive_order_list.dart';
 
 class PickedRequest extends StatefulWidget {
   const PickedRequest({super.key});
@@ -74,31 +72,9 @@ class _PickedRequestState extends State<PickedRequest> {
           );
         }
 
-        return ListView.builder(
-          padding: EdgeInsets.symmetric(vertical: 8),
-          itemCount: viewModel.pickupRequests.length,
-          itemBuilder: (context, index) {
-            final schedule = viewModel.pickupRequests[index];
-            return FutureBuilder<UserModel?>(
-              future: viewModel.getUserDetails(schedule.userId),
-              builder: (context, snapshot) {
-                String customerName = 'Loading...';
-                if (snapshot.hasData && snapshot.data != null) {
-                  customerName = snapshot.data!.fullName ?? 'Unknown';
-                }
-                
-                return ShopkeeperOrderCard(
-                  schedule: schedule,
-                  customerName: customerName,
-                  onModify: () {
-                    Navigator.pushNamed(
-                  context,PPages.orderDetailPageUi,arguments: schedule
-                    );
-                  },
-                );
-              },
-            );
-          },
+        return ResponsiveOrderList(
+          orders: viewModel.pickupRequests,
+          viewModel: viewModel,
         );
       },
     );

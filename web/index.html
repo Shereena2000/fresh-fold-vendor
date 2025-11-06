@@ -31,6 +31,26 @@
 
   <title>fresh_fold_shop_keeper</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  
+  <script>
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyAxe6NJEd2C_MG4o0EPN9GlJWOBTLOBzbA",
+      authDomain: "freshfold-31734.firebaseapp.com",
+      projectId: "freshfold-31734",
+      storageBucket: "freshfold-31734.firebasestorage.app",
+      messagingSenderId: "721774046319",
+      appId: "1:721774046319:web:ccee433e4688007013b19a",
+      measurementId: "G-L4E0YGQYKP"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>

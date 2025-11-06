@@ -16,41 +16,49 @@ class OrderScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isWeb = screenWidth > 900;
+    final isTablet = screenWidth > 600 && screenWidth <= 900;
+    
     return Scaffold(
       appBar: CustomAppBar(title: "Orders"),
-
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Expanded(
-                child: CustomTabSection(
-                  contentHPadding: 10,
-                  fontSize: 12,
-                  tabTitles: const [
-                    "Pickup Requests",
-                    "Confirmed",
-                    "Picked Up",
-                    "Processing",
-                    "Ready to Deliver",
-                    "Deliverved",
-                    "Paid",
-                    "Cancelled",
-                  ],
-                  tabContents: const [
-                    PickedRequest(),
-                    Confirmed(),
-                    PickedUp(),
-                    Processing(),
-                    ReadyToDeliver(),
-                    Delivered(),
-                    Paid(),
-                    Cancelled(),
-                  ],
+        child: Center(
+          child: Container(
+            constraints: BoxConstraints(
+              maxWidth: isWeb ? 1400 : double.infinity,
+            ),
+            padding: EdgeInsets.all(isWeb ? 24 : 16),
+            child: Column(
+              children: [
+                Expanded(
+                  child: CustomTabSection(
+                    contentHPadding: isWeb ? 20 : (isTablet ? 15 : 10),
+                    fontSize: isWeb ? 14 : 12,
+                    tabTitles: const [
+                      "Pickup Requests",
+                      "Confirmed",
+                      "Picked Up",
+                      "Processing",
+                      "Ready to Deliver",
+                      "Deliverved",
+                      "Paid",
+                      "Cancelled",
+                    ],
+                    tabContents: const [
+                      PickedRequest(),
+                      Confirmed(),
+                      PickedUp(),
+                      Processing(),
+                      ReadyToDeliver(),
+                      Delivered(),
+                      Paid(),
+                      Cancelled(),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

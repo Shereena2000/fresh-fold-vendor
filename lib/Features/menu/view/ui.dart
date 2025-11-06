@@ -86,6 +86,11 @@ class MenuScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isWeb = screenWidth > 900;
+    final isTablet = screenWidth > 600 && screenWidth <= 900;
+    final horizontalPadding = isWeb ? 32.0 : (isTablet ? 24.0 : 16.0);
+    
     return Scaffold(
       appBar: CustomAppBar(title: "Menu"),
       body: StreamBuilder<VendorModel?>(
@@ -93,10 +98,17 @@ class MenuScreen extends StatelessWidget {
         builder: (context, snapshot) {
           final menuViewModel = context.read<MenuViewModel>();
 
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
+          return Center(
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: isWeb ? 800 : double.infinity,
+              ),
+              padding: EdgeInsets.symmetric(
+                horizontal: horizontalPadding,
+                vertical: 16,
+              ),
+              child: Column(
+                children: [
                 // User Profile Card
                 Card(
                   elevation: 2,
@@ -197,7 +209,8 @@ class MenuScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-              ],
+                ],
+              ),
             ),
           );
         },

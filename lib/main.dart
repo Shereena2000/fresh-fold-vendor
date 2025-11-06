@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
@@ -10,8 +11,31 @@ import 'Settings/utils/p_routes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  await dotenv.load(fileName: ".env");
+  
+  // Initialize Firebase based on platform
+  if (kIsWeb) {
+    // For web, Firebase is already initialized in index.html
+    await Firebase.initializeApp(
+      options: FirebaseOptions(
+        apiKey: "AIzaSyAxe6NJEd2C_MG4o0EPN9GlJWOBTLOBzbA",
+        authDomain: "freshfold-31734.firebaseapp.com",
+        projectId: "freshfold-31734",
+        storageBucket: "freshfold-31734.firebasestorage.app",
+        messagingSenderId: "721774046319",
+        appId: "1:721774046319:web:ccee433e4688007013b19a",
+        measurementId: "G-L4E0YGQYKP",
+      ),
+    );
+  } else {
+    // For mobile platforms (Android/iOS)
+    await Firebase.initializeApp();
+  }
+  
+  // Load .env file (only works on mobile/desktop, not web)
+  if (!kIsWeb) {
+    await dotenv.load(fileName: ".env");
+  }
+  
   runApp(MultiProvider(providers: providers, child: MyApp()));
 }
 

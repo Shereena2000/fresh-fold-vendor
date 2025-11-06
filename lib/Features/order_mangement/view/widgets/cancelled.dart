@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../Settings/utils/p_colors.dart';
-import '../../../../Settings/utils/p_pages.dart';
-import '../../model/client_model.dart';
 import '../../view_model/order_view_model.dart';
-import 'order_card.dart';
+import 'responsive_order_list.dart';
 
 class Cancelled extends StatefulWidget {
   const Cancelled({super.key});
@@ -27,30 +25,9 @@ class _CancelledState extends State<Cancelled> {
           return _buildEmptyState('No cancelled orders', Icons.cancel);
         }
 
-        return ListView.builder(
-          padding: EdgeInsets.symmetric(vertical: 8),
-          itemCount: viewModel.cancelled.length,
-          itemBuilder: (context, index) {
-            final schedule = viewModel.cancelled[index];
-            return FutureBuilder<UserModel?>(
-              future: viewModel.getUserDetails(schedule.userId),
-              builder: (context, snapshot) {
-                String customerName = snapshot.hasData && snapshot.data != null
-                    ? snapshot.data!.fullName ?? 'Unknown'
-                    : 'Loading...';
-                
-                return ShopkeeperOrderCard(
-                  schedule: schedule,
-                  customerName: customerName,
-                  onModify: () {
-                     Navigator.pushNamed(
-                  context,PPages.orderDetailPageUi,arguments: schedule
-                    );
-                  },
-                );
-              },
-            );
-          },
+        return ResponsiveOrderList(
+          orders: viewModel.cancelled,
+          viewModel: viewModel,
         );
       },
     );
