@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import 'dart:convert';
 
 import '../../Settings/constants/cloudinary_config.dart';
@@ -21,6 +22,50 @@ class CloudinaryService {
       // Add file
       request.files.add(
         await http.MultipartFile.fromPath('file', imageFile.path),
+      );
+
+      final response = await request.send();
+      
+      if (response.statusCode == 200) {
+        final responseData = await response.stream.bytesToString();
+        final jsonData = json.decode(responseData);
+        
+        return {
+          'url': jsonData['secure_url'],
+          'public_id': jsonData['public_id'],
+        };
+      } else {
+        final responseData = await response.stream.bytesToString();
+        throw Exception('Failed to upload image: ${response.statusCode} - $responseData');
+      }
+    } catch (e) {
+      throw Exception('Error uploading to Cloudinary: $e');
+    }
+  }
+
+  /// Upload image to Cloudinary for Web - uses XFile and bytes
+  Future<Map<String, dynamic>?> uploadImageWeb(XFile imageFile) async {
+    try {
+      final url = Uri.parse(CloudinaryConfig.uploadUrl);
+
+      final request = http.MultipartRequest('POST', url);
+      
+      // Add upload preset
+      request.fields['upload_preset'] = CloudinaryConfig.uploadPreset;
+      
+      // Add folder for organization
+      request.fields['folder'] = CloudinaryConfig.promoFolder;
+      
+      // Read file as bytes for web
+      final bytes = await imageFile.readAsBytes();
+      
+      // Add file
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'file',
+          bytes,
+          filename: imageFile.name,
+        ),
       );
 
       final response = await request.send();

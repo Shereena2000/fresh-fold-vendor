@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -45,8 +46,8 @@ class PromoViewModel extends ChangeNotifier {
     return _repository.streamAllPromos();
   }
 
-  /// Pick image from gallery
-  Future<File?> pickImageFromGallery() async {
+  /// Pick image from gallery - returns XFile for cross-platform support
+  Future<XFile?> pickImageFromGallery() async {
     try {
       final XFile? image = await _imagePicker.pickImage(
         source: ImageSource.gallery,
@@ -55,10 +56,7 @@ class PromoViewModel extends ChangeNotifier {
         maxHeight: 1080,
       );
 
-      if (image != null) {
-        return File(image.path);
-      }
-      return null;
+      return image;
     } catch (e) {
       _errorMessage = 'Failed to pick image: $e';
       notifyListeners();
@@ -66,8 +64,8 @@ class PromoViewModel extends ChangeNotifier {
     }
   }
 
-  /// Pick image from camera
-  Future<File?> pickImageFromCamera() async {
+  /// Pick image from camera - returns XFile for cross-platform support
+  Future<XFile?> pickImageFromCamera() async {
     try {
       final XFile? image = await _imagePicker.pickImage(
         source: ImageSource.camera,
@@ -76,10 +74,7 @@ class PromoViewModel extends ChangeNotifier {
         maxHeight: 1080,
       );
 
-      if (image != null) {
-        return File(image.path);
-      }
-      return null;
+      return image;
     } catch (e) {
       _errorMessage = 'Failed to capture image: $e';
       notifyListeners();
@@ -87,16 +82,24 @@ class PromoViewModel extends ChangeNotifier {
     }
   }
 
-  /// Upload promo image
-  Future<bool> uploadPromo(File imageFile, String vendorUid) async {
+  /// Upload promo image - accepts XFile for cross-platform support
+  Future<bool> uploadPromo(XFile imageFile, String vendorUid) async {
     _isUploading = true;
     _errorMessage = null;
     _successMessage = null;
     notifyListeners();
 
     try {
+      // Convert XFile to File for mobile, or handle bytes for web
+      File? file;
+      if (!kIsWeb) {
+        file = File(imageFile.path);
+      }
+      
       // Upload to Cloudinary
-      final uploadResult = await _cloudinaryService.uploadImage(imageFile);
+      final uploadResult = kIsWeb
+          ? await _cloudinaryService.uploadImageWeb(imageFile)
+          : await _cloudinaryService.uploadImage(file!);
       
       if (uploadResult == null) {
         throw Exception('Failed to upload image to Cloudinary');

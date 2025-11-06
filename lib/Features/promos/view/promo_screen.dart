@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../../../Settings/utils/p_colors.dart';
@@ -24,6 +26,13 @@ class _PromoManagementScreenState extends State<PromoManagementScreen> {
   }
 
   void _showImageSourceDialog() {
+    // On web, skip the dialog and go directly to gallery
+    if (kIsWeb) {
+      _pickAndUploadImage(fromCamera: false);
+      return;
+    }
+    
+    // On mobile, show camera and gallery options
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
@@ -80,8 +89,8 @@ class _PromoManagementScreenState extends State<PromoManagementScreen> {
       return;
     }
 
-    // Pick image
-    File? imageFile;
+    // Pick image (returns XFile for cross-platform support)
+    XFile? imageFile;
     if (fromCamera) {
       imageFile = await promoViewModel.pickImageFromCamera();
     } else {
@@ -91,7 +100,34 @@ class _PromoManagementScreenState extends State<PromoManagementScreen> {
     if (imageFile == null) return;
 
     // Show preview and confirm
-    final confirm = await showDialog<bool>(
+    final confirm = await _showImagePreviewDialog(imageFile);
+
+    if (confirm != true) return;
+
+    // Upload
+    final success = await promoViewModel.uploadPromo(imageFile, vendorUid);
+
+    if (!mounted) return;
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Promo uploaded successfully!'),
+          backgroundColor: PColors.successGreen,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(promoViewModel.errorMessage ?? 'Upload failed'),
+          backgroundColor: PColors.errorRed,
+        ),
+      );
+    }
+  }
+
+  Future<bool?> _showImagePreviewDialog(XFile imageFile) async {
+    return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Upload Promo?'),
@@ -100,10 +136,17 @@ class _PromoManagementScreenState extends State<PromoManagementScreen> {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: Image.file(
-                imageFile!,
-                height: 200,
-                fit: BoxFit.cover,
+              child: FutureBuilder<Widget>(
+                future: _buildImagePreview(imageFile),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Container(
+                      height: 200,
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  return snapshot.data ?? SizedBox();
+                },
               ),
             ),
             SizedBox(height: 16),
@@ -128,27 +171,23 @@ class _PromoManagementScreenState extends State<PromoManagementScreen> {
         ],
       ),
     );
+  }
 
-    if (confirm != true) return;
-
-    // Upload
-    final success = await promoViewModel.uploadPromo(imageFile, vendorUid);
-
-    if (!mounted) return;
-
-    if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Promo uploaded successfully!'),
-          backgroundColor: PColors.successGreen,
-        ),
+  Future<Widget> _buildImagePreview(XFile imageFile) async {
+    if (kIsWeb) {
+      // For web: use Image.memory with bytes
+      final bytes = await imageFile.readAsBytes();
+      return Image.memory(
+        bytes,
+        height: 200,
+        fit: BoxFit.cover,
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(promoViewModel.errorMessage ?? 'Upload failed'),
-          backgroundColor: PColors.errorRed,
-        ),
+      // For mobile: use Image.file
+      return Image.file(
+        File(imageFile.path),
+        height: 200,
+        fit: BoxFit.cover,
       );
     }
   }
