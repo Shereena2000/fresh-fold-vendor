@@ -1,11 +1,11 @@
 {
-    "name": "fresh_fold_shop_keeper",
-    "short_name": "fresh_fold_shop_keeper",
+    "name": "FreshFold Vendor",
+    "short_name": "FreshFold",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#013E6A",
+    "theme_color": "#013E6A",
+    "description": "FreshFold Vendor - Manage your laundry business orders, pricing, and promos.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

@@ -63,7 +63,7 @@ class LoginScreen extends StatelessWidget {
                         ),
                         SizeBoxH(16),
                         Text(
-                          "FreshFold Shop Keeper",
+                          "FreshFold Vendor",
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
